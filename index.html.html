@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="mn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>AR цахилгаан хэлхээ</title>
+<link href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#eef2ee;--panel:#fff;--ink:#14231e;--mute:#53655d;--line:#cfdad3;--acc:#0f7a5f;--accink:#fff;--warn:#a4430f;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0c1512;--panel:#142721;--ink:#e6f0ea;--mute:#9bb2a7;--line:#25403750;--acc:#7ee0c3;--accink:#08251d;--warn:#f0a26b}}
+:root[data-theme="dark"]{--bg:#0c1512;--panel:#142721;--ink:#e6f0ea;--mute:#9bb2a7;--line:#25403750;--acc:#7ee0c3;--accink:#08251d;--warn:#f0a26b}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Golos Text",system-ui,-apple-system,"Segoe UI",Arial,sans-serif;line-height:1.5}
+main{max-width:960px;margin:0 auto;padding:20px 16px 40px}
+h1{font-size:clamp(1.5rem,4.5vw,2.3rem);font-weight:800;margin:0 0 4px;letter-spacing:-.01em}
+.sub{color:var(--mute);margin:0 0 16px}
+.stage{position:relative;height:min(62vh,460px);min-height:300px;border-radius:14px;overflow:hidden;background:radial-gradient(ellipse at 50% 30%,#1d3a31,#0a1612);border:1px solid var(--line)}
+.stage video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:none}
+.stage.ar video{display:block}
+.stage.ar{background:#000}
+canvas{position:absolute;inset:0;width:100%;height:100%;touch-action:none;display:block}
+.hint{position:absolute;left:10px;bottom:8px;font-size:.78rem;color:#cfe3da;background:#0008;padding:3px 8px;border-radius:6px;pointer-events:none}
+.tabs,.acts{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}
+button{font:inherit;cursor:pointer;border:1px solid var(--line);background:var(--panel);color:var(--ink);padding:9px 14px;border-radius:10px;min-height:44px}
+button[aria-pressed="true"]{background:var(--acc);color:var(--accink);border-color:var(--acc);font-weight:600}
+button:focus-visible{outline:3px solid var(--acc);outline-offset:2px}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:4px 0 12px}
+.m{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+.m b{display:block;font-size:1.45rem;font-weight:800}
+.m span{color:var(--mute);font-size:.85rem}
+.say{background:var(--panel);border:1px solid var(--line);border-left:5px solid var(--acc);border-radius:10px;padding:12px 14px;margin:0 0 10px}
+#st{font-weight:600;margin:0 0 10px}
+.safe{font-size:.85rem;color:var(--warn);margin:14px 0 0}
+</style>
+</head>
+<body>
+<main>
+<h1>AR цахилгаан хэлхээ</h1>
+<p class="sub">Хэлхээг эргүүлж, унтраалгыг дарж, чийдэн хэрхэн асахыг өөрөө шалга.</p>
+
+<div class="stage" id="stage">
+  <video id="vid" playsinline muted></video>
+  <canvas id="cv" aria-label="3D цахилгаан хэлхээ"></canvas>
+  <div class="hint">Чирж эргүүл · Унтраалгыг дарж залга</div>
+</div>
+
+<div class="tabs" role="group" aria-label="Хичээл сонгох" id="tabs"></div>
+<div class="acts">
+  <button id="bsw" aria-pressed="false">Унтраалга залгах</button>
+  <button id="bar" aria-pressed="false">Камертай AR нээх</button>
+</div>
+
+<p id="st" aria-live="polite"></p>
+<div class="grid">
+  <div class="m"><b>9 В</b><span>Батерейн хүчдэл</span></div>
+  <div class="m"><b id="rt">–</b><span>Нийт эсэргүүцэл</span></div>
+  <div class="m"><b id="it">–</b><span>Нийт гүйдэл</span></div>
+</div>
+<p class="say" id="say"></p>
+<p class="safe">AR симуляци нь бодит цахилгааны дадлагыг орлохгүй. Бодит ажлыг багшийн хяналтад, зохих хамгаалалттайгаар хийнэ. Энд 9 В-ын аюулгүй хэлхээг үзүүлж байна.</p>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(function(){
+var $=function(i){return document.getElementById(i)};
+var R=18,U=9;
+var MODES={
+ simple:{n:'Энгийн хэлхээ',vx:[4],lamps:[[4,0]],k:1,rt:R,
+  loops:[[[-4,2],[-4,-2],[4,-2],[4,2],[-4,2]]],
+  say:'Унтраалгыг залгахад хэлхээ хаалттай болж, гүйдэл гүйн чийдэн асна. I = U / R = 9 / 18 = 0.5 А.'},
+ series:{n:'Цуваа холболт',vx:[4],lamps:[[4,-1],[4,1]],k:.3,rt:2*R,
+  loops:[[[-4,2],[-4,-2],[4,-2],[4,2],[-4,2]]],
+  say:'Цуваа холболтод гүйдэл нэг замаар гүйж, эсэргүүцэл нийлнэ (18 + 18 = 36 Ом). Гүйдэл 0.25 А болж хоёр чийдэн бүүдгэр асна.'},
+ parallel:{n:'Зэрэгцээ холболт',vx:[1,4],lamps:[[1,0],[4,0]],k:1,rt:R/2,
+  loops:[[[-4,2],[-4,-2],[1,-2],[1,2],[-4,2]],[[-4,2],[-4,-2],[4,-2],[4,2],[-4,2]]],
+  say:'Зэрэгцээ холболтод чийдэн бүр 9 В авч бүтэн гэрэлтэнэ. Салаа бүр 0.5 А, нийт гүйдэл 1 А.'},
+ fault:{n:'Алдаа олох',vx:[4],lamps:[[4,0]],k:1,rt:R,fault:1,
+  loops:[[[-4,2],[-4,-2],[4,-2],[4,2],[-4,2]]],
+  say:'Хэлхээний доод утас тасарсан байна. Улаан цоорхойг дарж утсыг залгаад, унтраалгыг хаа.'}
+};
+var mode='simple',swOn=false,fixed=false,ar=false,stream=null;
+
+var stage=$('stage'),cv=$('cv'),renderer;
+try{renderer=new THREE.WebGLRenderer({canvas:cv,antialias:true,alpha:true})}catch(e){stage.innerHTML='<p style="color:#fff;padding:20px">Энэ төхөөрөмж 3D дэмжихгүй байна.</p>';return}
+renderer.setPixelRatio(Math.min(devicePixelRatio||1,2));
+var scene=new THREE.Scene(),cam=new THREE.PerspectiveCamera(42,1,.1,100);
+cam.position.set(0,9,11);cam.lookAt(0,0,0);
+scene.add(new THREE.AmbientLight(0xffffff,.65));
+var dl=new THREE.DirectionalLight(0xffffff,.8);dl.position.set(4,10,6);scene.add(dl);
+var root=new THREE.Group(),content=new THREE.Group();
+root.add(content);scene.add(root);root.rotation.y=-.35;
+
+var M={
+ board:new THREE.MeshStandardMaterial({color:0x14382d,roughness:.8,transparent:true,opacity:1}),
+ cu:new THREE.MeshStandardMaterial({color:0xd08a4e,metalness:.6,roughness:.35}),
+ bat:new THREE.MeshStandardMaterial({color:0x2a5db0,roughness:.5}),
+ cap:new THREE.MeshStandardMaterial({color:0xc9ced3,metalness:.7,roughness:.3}),
+ base:new THREE.MeshStandardMaterial({color:0x555d63}),
+ hot:new THREE.MeshStandardMaterial({color:0xff4d3d,transparent:true,opacity:.55,emissive:0x661108}),
+ dot:new THREE.MeshBasicMaterial({color:0x8ff3ff})
+};
+var board=new THREE.Mesh(new THREE.BoxGeometry(11,.3,6.6),M.board);board.position.y=-.15;scene.add(board);root.add(board);
+
+function seg(a,b,mat,r){var dx=b[0]-a[0],dz=b[1]-a[1],L=Math.hypot(dx,dz);
+ var m=new THREE.Mesh(new THREE.CylinderGeometry(r||.09,r||.09,L,10),mat||M.cu);
+ m.position.set((a[0]+b[0])/2,.2,(a[1]+b[1])/2);
+ m.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),new THREE.Vector3(dx,0,dz).normalize());return m}
+function label(t,x,y,z,w){var c=document.createElement('canvas');c.width=256;c.height=64;var g=c.getContext('2d');
+ g.fillStyle='rgba(10,22,18,.82)';g.fillRect(0,0,256,64);g.fillStyle='#e8f6ef';g.font='600 30px system-ui,Arial,sans-serif';g.textAlign='center';g.textBaseline='middle';g.fillText(t,128,34);
+ var s=new THREE.Sprite(new THREE.SpriteMaterial({map:new THREE.CanvasTexture(c),depthTest:false}));
+ s.position.set(x,y,z);s.scale.set(w||2.2,(w||2.2)/4,1);s.renderOrder=9;return s}
+
+var lamps=[],lever,gap,dots=[],lights=[];
+function clear(){while(content.children.length){var o=content.children[0];content.remove(o)}lamps=[];dots=[];lights=[];gap=null}
+
+function build(){
+ clear();var d=MODES[mode],xs=[-4].concat(d.vx),last=d.vx[d.vx.length-1];
+ content.add(seg([-4,-2],[last,-2]));
+ if(d.fault){content.add(seg([-4,2],[-1.5,2]));content.add(seg([1.5,2],[last,2]));
+  gap=seg([-1.5,2],[1.5,2],fixed?M.cu:M.hot,fixed?.09:.22);content.add(gap)}
+ else content.add(seg([-4,2],[last,2]));
+ xs.forEach(function(x){content.add(seg([x,-2],[x,2]))});
+ // battery
+ var b=new THREE.Mesh(new THREE.CylinderGeometry(.6,.6,1.7,24),M.bat);b.rotation.x=Math.PI/2;b.position.set(-4,.65,0);content.add(b);
+ var cp=new THREE.Mesh(new THREE.CylinderGeometry(.25,.25,.3,16),M.cap);cp.rotation.x=Math.PI/2;cp.position.set(-4,.65,-1);content.add(cp);
+ content.add(label('Батерей 9 В',-4,1.8,0,2.4));
+ // switch
+ [-2.2,-.6].forEach(function(x){var p=new THREE.Mesh(new THREE.CylinderGeometry(.16,.16,.5,12),M.cap);p.position.set(x,.3,-2);content.add(p)});
+ var piv=new THREE.Group();piv.position.set(-2.2,.55,-2);
+ lever=new THREE.Mesh(new THREE.BoxGeometry(1.8,.14,.22),new THREE.MeshStandardMaterial({color:0xe9d35a}));
+ lever.position.x=.85;piv.add(lever);piv.userData.p=1;content.add(piv);lever.userData.piv=piv;
+ content.add(label('Унтраалга',-1.4,1.4,-2,2.2));
+ // lamps
+ d.lamps.forEach(function(p){
+  var base=new THREE.Mesh(new THREE.CylinderGeometry(.4,.5,.4,20),M.base);base.position.set(p[0],.2,p[1]);content.add(base);
+  var mat=new THREE.MeshStandardMaterial({color:0xcfd6d2,emissive:0xffc93c,emissiveIntensity:0,transparent:true,opacity:.92});
+  var bulb=new THREE.Mesh(new THREE.SphereGeometry(.65,24,18),mat);bulb.position.set(p[0],1,p[1]);content.add(bulb);
+  var L=new THREE.PointLight(0xffc93c,0,9);L.position.set(p[0],1.4,p[1]);content.add(L);lights.push(L);
+  lamps.push({m:mat,v:0});
+  content.add(label('Чийдэн',p[0]+(p[0]>3?1.7:0),1.9,p[1]+(p[0]>3?0:0),1.7));
+ });
+ // electrons
+ d.loops.forEach(function(pts){var cum=[0];for(var i=1;i<pts.length;i++)cum.push(cum[i-1]+Math.hypot(pts[i][0]-pts[i-1][0],pts[i][1]-pts[i-1][1]));
+  var n=Math.round(cum[cum.length-1]*1.1),arr=[];
+  for(var j=0;j<n;j++){var m=new THREE.Mesh(new THREE.SphereGeometry(.12,8,8),M.dot);m.visible=false;content.add(m);arr.push({m:m,o:j/n})}
+  dots.push({pts:pts,cum:cum,len:cum[cum.length-1],arr:arr})});
+ $('say').textContent=d.say;refresh();
+}
+function closed(){var d=MODES[mode];return swOn&&(!d.fault||fixed)}
+function refresh(){
+ var d=MODES[mode],c=closed();
+ $('bsw').setAttribute('aria-pressed',swOn);$('bsw').textContent=swOn?'Унтраалга салгах':'Унтраалга залгах';
+ $('rt').textContent=d.rt%1?d.rt.toFixed(1)+' Ом':d.rt+' Ом';
+ $('it').textContent=c?(U/d.rt).toFixed(2)+' А':'0 А';
+ var s;
+ if(d.fault&&!fixed)s='Утас тасарсан тул хэлхээ нээлттэй. Улаан цоорхойг дарж залга.';
+ else if(!swOn)s='Унтраалга салсан тул хэлхээ нээлттэй, гүйдэл гүйхгүй.';
+ else s='Хэлхээ хаалттай. Гүйдэл гүйж, чийдэн асаж байна.';
+ $('st').textContent=s;
+}
+// tabs
+Object.keys(MODES).forEach(function(k){var b=document.createElement('button');b.textContent=MODES[k].n;b.setAttribute('aria-pressed',k===mode);b.dataset.k=k;
+ b.onclick=function(){mode=k;fixed=false;[].forEach.call($('tabs').children,function(x){x.setAttribute('aria-pressed',x.dataset.k===k)});build()};$('tabs').appendChild(b)});
+$('bsw').onclick=function(){swOn=!swOn;refresh()};
+$('bar').onclick=function(){
+ if(ar){ar=false;if(stream){stream.getTracks().forEach(function(t){t.stop()});stream=null}stage.classList.remove('ar');M.board.opacity=1;$('bar').setAttribute('aria-pressed',false);$('bar').textContent='Камертай AR нээх';return}
+ if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){$('st').textContent='Камер дэмжигдэхгүй байна. Утасны хөтөч дээр нээнэ үү.';return}
+ navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'}}).then(function(s){
+  stream=s;ar=true;var v=$('vid');v.srcObject=s;v.play();stage.classList.add('ar');M.board.opacity=.3;
+  $('bar').setAttribute('aria-pressed',true);$('bar').textContent='Камер хаах'}).catch(function(){
+  $('st').textContent='Камер нээгдсэнгүй. Хөтчийн камерын зөвшөөрлийг шалгана уу.'});
+};
+
+// interaction
+var ray=new THREE.Raycaster(),pt=new THREE.Vector2(),down=null,moved=false;
+cv.addEventListener('pointerdown',function(e){down={x:e.clientX,y:e.clientY,r:root.rotation.y};moved=false;cv.setPointerCapture(e.pointerId)});
+cv.addEventListener('pointermove',function(e){if(!down)return;var dx=e.clientX-down.x;if(Math.abs(dx)>4)moved=true;
+ if(moved)root.rotation.y=down.r+dx*.01});
+cv.addEventListener('pointerup',function(e){
+ if(down&&!moved){var r=cv.getBoundingClientRect();pt.set((e.clientX-r.left)/r.width*2-1,-(e.clientY-r.top)/r.height*2+1);
+  ray.setFromCamera(pt,cam);var t=[lever];if(gap&&!fixed)t.push(gap);var h=ray.intersectObjects(t,false);
+  if(h.length){if(h[0].object===lever)swOn=!swOn;else{fixed=true;gap.material=M.cu;gap.geometry=seg([-1.5,2],[1.5,2]).geometry;gap.scale.set(1,1,1)}refresh()}}
+ down=null});
+
+function size(){var w=stage.clientWidth,h=stage.clientHeight;renderer.setSize(w,h,false);cam.aspect=w/h;
+ cam.position.set(0,w<520?13:9,w<520?15:11);cam.lookAt(0,0,0);cam.updateProjectionMatrix()}
+addEventListener('resize',size);
+
+var last=performance.now();
+function loop(now){var dt=Math.min((now-last)/1000,.05);last=now;
+ var d=MODES[mode],c=closed(),I=c?U/d.rt:0;
+ var piv=lever.userData.piv;piv.rotation.z+=((swOn?0:.7)-piv.rotation.z)*Math.min(1,dt*10);
+ lamps.forEach(function(l,i){var tgt=c?d.k:0;l.v+=(tgt-l.v)*Math.min(1,dt*8);l.m.emissiveIntensity=l.v*1.6;lights[i].intensity=l.v*1.4});
+ dots.forEach(function(lp){lp.arr.forEach(function(a){a.m.visible=c;if(!c)return;
+  a.o=(a.o+dt*I*.9/lp.len*3)%1;var s=a.o*lp.len,i=1;while(i<lp.cum.length-1&&lp.cum[i]<s)i++;
+  var t=(s-lp.cum[i-1])/(lp.cum[i]-lp.cum[i-1]),p=lp.pts[i-1],q=lp.pts[i];
+  a.m.position.set(p[0]+(q[0]-p[0])*t,.2,p[1]+(q[1]-p[1])*t)})});
+ renderer.render(scene,cam);requestAnimationFrame(loop)}
+size();build();requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>
