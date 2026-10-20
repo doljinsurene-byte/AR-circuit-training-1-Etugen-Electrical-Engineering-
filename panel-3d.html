@@ -95,6 +95,44 @@ light.position.set(4,8,6);
 scene.add(light);
 
 const clickable=[];
+let mcbInstalled = false;
+let rcdInstalled = false;
+
+window.checkAssembly = function(){
+  const info = document.getElementById("info");
+
+  if(mcbInstalled && rcdInstalled){
+    info.textContent =
+      "Амжилттай! MCB болон RCD төхөөрөмжүүд DIN рейк дээр байрласан байна.";
+  } else {
+    const missing = [];
+    if(!mcbInstalled) missing.push("MCB");
+    if(!rcdInstalled) missing.push("RCD");
+
+    info.textContent =
+      "Угсралт дутуу байна. Байрлуулах төхөөрөмж: " +
+      missing.join(", ");
+  }
+};
+let mcbInstalled = false;
+let rcdInstalled = false;
+
+window.checkAssembly = function(){
+  const info = document.getElementById("info");
+
+  if(mcbInstalled && rcdInstalled){
+    info.textContent =
+      "Амжилттай! MCB болон RCD төхөөрөмжүүд DIN рейк дээр байрласан байна.";
+  } else {
+    const missing = [];
+    if(!mcbInstalled) missing.push("MCB");
+    if(!rcdInstalled) missing.push("RCD");
+
+    info.textContent =
+      "Угсралт дутуу байна. Байрлуулах төхөөрөмж: " +
+      missing.join(", ");
+  }
+};
 
 function box(name,w,h,d,x,y,z,color){
  const mesh=new THREE.Mesh(
@@ -119,16 +157,28 @@ const mcbBody = box("mcb",0.85,1.75,0.72,-1.55,-2.8,0.16,0xf8fafc);
 const mcbSwitch = box("mcb",0.36,0.43,0.13,-1.55,-2.65,0.59,0x252c38);
 
 window.installMCB = function(){
+mcbInstalled = true;
   mcbBody.position.y = 0.75;
   mcbSwitch.position.y = 0.9;
   document.getElementById("info").textContent =
     "MCB автомат таслуурыг DIN рейк дээр байрлууллаа.";
 };
 
-// RCD
-box("rcd",1.5,1.75,0.72,0.1,0.75,0.16,0xf1f5f9);
-box("rcd",0.45,0.42,0.13,0.1,0.92,0.59,0x252c38);
-box("rcd",0.20,0.20,0.12,0.55,0.30,0.59,0xeab308);
+// RCD — угсралтаар байрлуулах төхөөрөмж
+const rcdBody = box("rcd",1.5,1.75,0.72,0.1,-2.8,0.16,0xf1f5f9);
+const rcdSwitch = box("rcd",0.45,0.42,0.13,0.1,-2.63,0.59,0x252c38);
+const rcdTest = box("rcd",0.20,0.20,0.12,0.55,-3.25,0.59,0xeab308);
+
+window.installRCD = function(){
+  rcdBody.position.y = 0.75;
+  rcdSwitch.position.y = 0.92;
+  rcdTest.position.y = 0.30;
+
+  rcdInstalled = true;
+
+  document.getElementById("info").textContent =
+    "RCD хамгаалалтын төхөөрөмжийг DIN рейк дээр байрлууллаа.";
+};
 
 // Розетк
 box("socket",1.25,1.35,0.42,1.8,-1.1,0.0,0xffffff);
