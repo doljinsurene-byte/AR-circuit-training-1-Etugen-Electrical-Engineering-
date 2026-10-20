@@ -1,0 +1,108 @@
+
+<!DOCTYPE html>
+<html lang="mn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ETUGEN - Хэрэглэгчийн цахилгаан хангамж</title>
+<style>
+body{font-family:Arial,sans-serif;background:#eef3f8;color:#17324d;margin:0}
+header{background:#103b64;color:white;padding:24px;text-align:center}
+main{max-width:900px;margin:24px auto;padding:0 16px}
+section{background:white;border-radius:14px;padding:22px;margin-bottom:18px}
+label{display:block;margin:14px 0}
+input[type=range]{width:100%}
+button,a{display:inline-block;padding:11px 16px;border:0;border-radius:8px;background:#146b9b;color:white;text-decoration:none;cursor:pointer}
+button{margin:5px}
+svg{width:100%;height:auto;background:#f8fafc;border-radius:10px}
+.result{font-size:20px;font-weight:bold}
+.warning{color:#b42318}
+.ok{color:#087443}
+</style>
+</head>
+<body>
+<header>
+<h1>Модуль 6. Хэрэглэгчийн цахилгаан хангамж</h1>
+<p>Автомат таслуур, RCD болон ачааллын интерактив лаборатори</p>
+</header>
+<main>
+<section>
+<a href="index.html">← Нүүр хуудас</a>
+<h2>1. Хэлхээний схем</h2>
+<svg viewBox="0 0 720 240" role="img" aria-label="Тэжээл, автомат таслуур, RCD, хэрэглэгчийн хэлхээ">
+<text x="20" y="38" font-size="18">230 В AC</text>
+<line x1="45" y1="95" x2="145" y2="95" stroke="#d33" stroke-width="5"/>
+<rect id="breaker" x="145" y="62" width="110" height="66" rx="8" fill="#b9dbea" stroke="#16466b" stroke-width="3"/>
+<text x="165" y="88" font-size="16">MCB</text>
+<text x="160" y="110" font-size="14">16 A</text>
+<line x1="255" y1="95" x2="350" y2="95" stroke="#d33" stroke-width="5"/>
+<rect id="rcd" x="350" y="62" width="115" height="66" rx="8" fill="#b9dbea" stroke="#16466b" stroke-width="3"/>
+<text x="375" y="88" font-size="16">RCD</text>
+<text x="365" y="110" font-size="14">30 mA</text>
+<line x1="465" y1="95" x2="555" y2="95" stroke="#d33" stroke-width="5"/>
+<rect id="load" x="555" y="62" width="125" height="66" rx="8" fill="#d8ead6" stroke="#267441" stroke-width="3"/>
+<text x="574" y="88" font-size="16">Ачаалал</text>
+<text id="loadText" x="574" y="110" font-size="14">1000 W</text>
+<text x="45" y="183" font-size="15">L — фазын дамжуулагч</text>
+<text x="45" y="210" font-size="15">N — саармаг дамжуулагч</text>
+<line x1="350" y1="178" x2="680" y2="178" stroke="#2563eb" stroke-width="4"/>
+</svg>
+</section>
+<section>
+<h2>2. Туршилтын удирдлага</h2>
+<label>Ачааллын чадал: <strong id="powerValue">1000 W</strong>
+<input id="power" type="range" min="0" max="6000" step="100" value="1000">
+</label>
+<label><input id="leakage" type="checkbox"> Газардуулгын алдагдлын гүйдэл үүсгэх (40 mA)</label>
+<button onclick="simulate()">Тооцоолох / ажиллуулах</button>
+<button onclick="resetLab()">Дахин тохируулах</button>
+</section>
+<section>
+<h2>3. Хэмжилт ба үр дүн</h2>
+<p>Тэжээлийн хүчдэл: <strong>230 В</strong></p>
+<p>Тооцоолсон гүйдэл: <span id="current" class="result">4.35 A</span></p>
+<p>Автомат таслуур: <strong id="mcbState">Залгасан</strong></p>
+<p>RCD хамгаалалт: <strong id="rcdState">Залгасан</strong></p>
+<p id="message" class="ok">Хэлхээ хэвийн ажиллаж байна.</p>
+</section>
+<section>
+<h2>4. Лабораторийн даалгавар</h2>
+<p>Ачааллыг 1000 Вт, 3000 Вт, 5000 Вт болгон өөрчилж гүйдлийг харьцуулна. Дараа нь газардуулгын алдагдлыг идэвхжүүлж RCD-ийн ажиллагааг ажиглана.</p>
+<p><strong>Тооцооны томьёо:</strong> I = P / U</p>
+<p><small>Сургалтын хялбаршуулсан загвар. cosφ = 1 гэж үзсэн. Бодит MCB-ийн дулаан-соронзон таслалтын хугацаа, RCD-ийн туршилтын нарийвчилсан характеристикийг загварчлаагүй.</small></p>
+</section>
+</main>
+<script>
+const power=document.getElementById("power");
+const leakage=document.getElementById("leakage");
+power.addEventListener("input",()=>{
+document.getElementById("powerValue").textContent=power.value+" W";
+document.getElementById("loadText").textContent=power.value+" W";
+simulate();
+});
+leakage.addEventListener("change",simulate);
+function simulate(){
+const p=Number(power.value);
+const i=p/230;
+const mcbTrip=i>16;
+const rcdTrip=leakage.checked;
+document.getElementById("current").textContent=i.toFixed(2)+" A";
+document.getElementById("mcbState").textContent=mcbTrip?"Тасарсан":"Залгасан";
+document.getElementById("rcdState").textContent=rcdTrip?"Тасарсан":"Залгасан";
+document.getElementById("breaker").setAttribute("fill",mcbTrip?"#f5a4a4":"#b9dbea");
+document.getElementById("rcd").setAttribute("fill",rcdTrip?"#f5a4a4":"#b9dbea");
+const msg=document.getElementById("message");
+msg.className=mcbTrip||rcdTrip?"warning":"ok";
+msg.textContent=rcdTrip?"RCD хамгаалалт ажиллалаа: алдагдлын гүйдэл 40 mA.":mcbTrip?"Ачааллын гүйдэл 16 A-аас их: MCB тасарсан (хялбаршуулсан загвар).":"Хэлхээ хэвийн ажиллаж байна.";
+}
+function resetLab(){
+power.value=1000;
+leakage.checked=false;
+document.getElementById("powerValue").textContent="1000 W";
+document.getElementById("loadText").textContent="1000 W";
+simulate();
+}
+simulate();
+</script>
+</body>
+</html>
