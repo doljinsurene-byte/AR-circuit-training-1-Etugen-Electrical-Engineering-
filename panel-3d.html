@@ -300,6 +300,76 @@ window.check3DWiring = function() {
   result.style.color = "#166534";
 };
 const raycaster=new THREE.Raycaster();
+
+/* 3D клемм болон холболтын цэгүүд */
+
+// Клеммийн нэрийг 3D орчинд харуулах
+function addTerminalLabel(text, x, y, z, color) {
+  const canvas = document.createElement("canvas");
+  canvas.width = 256;
+  canvas.height = 128;
+
+  const ctx = canvas.getContext("2d");
+  ctx.clearRect(0, 0, 256, 128);
+  ctx.font = "bold 72px Arial";
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.fillStyle = color;
+  ctx.fillText(text, 128, 64);
+
+  const texture = new THREE.CanvasTexture(canvas);
+  const material = new THREE.SpriteMaterial({
+    map: texture,
+    depthTest: false
+  });
+
+  const sprite = new THREE.Sprite(material);
+  sprite.position.set(x, y, z);
+  sprite.scale.set(0.55, 0.28, 1);
+  scene.add(sprite);
+}
+
+// Клеммийн жижиг холболтын цэг
+function addTerminal(name, x, y, z, color) {
+  const terminal = new THREE.Mesh(
+    new THREE.SphereGeometry(0.085, 16, 12),
+    new THREE.MeshStandardMaterial({ color })
+  );
+
+  terminal.position.set(x, y, z);
+  terminal.userData.part = name;
+  scene.add(terminal);
+  clickable.push(terminal);
+}
+
+// MCB-ийн сургалтын клеммүүд
+addTerminal("mcb", -1.55, 1.65, 0.58, 0xdc2626);
+addTerminalLabel("L IN", -1.55, 1.95, 0.65, "#b91c1c");
+
+addTerminal("mcb", -1.55, -0.15, 0.58, 0xdc2626);
+addTerminalLabel("L OUT", -1.55, -0.43, 0.65, "#b91c1c");
+
+// RCD-ийн сургалтын клеммүүд
+addTerminal("rcd", -0.30, 1.65, 0.58, 0xdc2626);
+addTerminalLabel("L", -0.30, 1.95, 0.65, "#b91c1c");
+
+addTerminal("rcd", 0.48, 1.65, 0.58, 0x2563eb);
+addTerminalLabel("N", 0.48, 1.95, 0.65, "#1d4ed8");
+
+// PE шинийн тэмдэглэгээ
+addTerminal("rail", -1.9, -1.65, 0.35, 0x16a34a);
+addTerminalLabel("PE", -1.9, -1.95, 0.45, "#15803d");
+
+// Розеткийн сургалтын клеммүүд
+addTerminal("socket", 1.45, -0.45, 0.35, 0xdc2626);
+addTerminalLabel("L", 1.45, -0.18, 0.40, "#b91c1c");
+
+addTerminal("socket", 1.80, -0.45, 0.35, 0x2563eb);
+addTerminalLabel("N", 1.80, -0.18, 0.40, "#1d4ed8");
+
+addTerminal("socket", 2.15, -0.45, 0.35, 0x16a34a);
+addTerminalLabel("PE", 2.15, -0.18, 0.40, "#15803d");
+
 const pointer=new THREE.Vector2();
 
 renderer.domElement.addEventListener("click",event=>{
