@@ -114,23 +114,6 @@ window.checkAssembly = function(){
       missing.join(", ");
   }
 };
-window.checkAssembly = function(){
-  const info = document.getElementById("info");
-
-  if(mcbInstalled && rcdInstalled){
-    info.textContent =
-      "Амжилттай! MCB болон RCD төхөөрөмжүүд DIN рейк дээр байрласан байна.";
-  } else {
-    const missing = [];
-    if(!mcbInstalled) missing.push("MCB");
-    if(!rcdInstalled) missing.push("RCD");
-
-    info.textContent =
-      "Угсралт дутуу байна. Байрлуулах төхөөрөмж: " +
-      missing.join(", ");
-  }
-};
-
 function box(name,w,h,d,x,y,z,color){
  const mesh=new THREE.Mesh(
   new THREE.BoxGeometry(w,h,d),
