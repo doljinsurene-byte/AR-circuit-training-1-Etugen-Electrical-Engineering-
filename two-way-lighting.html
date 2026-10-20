@@ -1,0 +1,264 @@
+
+<!DOCTYPE html>
+<html lang="mn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ETUGEN - Хоёр цэгээс удирдах гэрэлтүүлэг</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,sans-serif;background:#edf3f8;color:#17324d}
+header{background:#103b64;color:white;text-align:center;padding:24px}
+main{max-width:1000px;margin:22px auto;padding:0 15px}
+section{background:white;border-radius:14px;padding:22px;margin-bottom:18px}
+h2{margin-top:0}
+button,a{display:inline-block;background:#146b9b;color:white;border:0;border-radius:8px;padding:11px 16px;margin:5px 4px;text-decoration:none;cursor:pointer}
+button:disabled{opacity:.5;cursor:not-allowed}
+select{width:100%;padding:10px;border:1px solid #bac8d6;border-radius:7px}
+label{display:block;margin:12px 0}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:15px}
+svg{width:100%;height:auto;background:#f8fafc;border:1px solid #dce5ed;border-radius:10px}
+.result{padding:15px;background:#edf3f8;border-radius:8px;margin-top:12px;line-height:1.6}
+.ok{background:#e5f5e9;color:#155b2b}
+.bad{background:#fde8e8;color:#9b1c1c}
+.note{font-size:13px;color:#536477}
+@media(max-width:700px){.grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header>
+<h1>ETUGEN CIRCUIT STUDIO</h1>
+<p>Модуль 6 — Хоёр цэгээс удирдах гэрэлтүүлгийн хэлхээ</p>
+</header>
+<main>
+
+<section>
+<a href="index.html">← Нүүр хуудас</a>
+<a href="professional-lab.html">← Модуль 6</a>
+<h2>Лабораторийн зорилго</h2>
+<p>Хоёр сэлгэн залгагч ашиглан нэг чийдэнг хоёр өөр байрлалаас удирдах хэлхээний ажиллагааг судлах.</p>
+<p class="note">220 В-ын сургалтын виртуал загвар. Бодит хүчдэлтэй угсралт хийх заавар биш.</p>
+</section>
+
+<section>
+<h2>1. Хэлхээний схем</h2>
+<svg viewBox="0 0 900 360" role="img" aria-label="Хоёр сэлгэн залгагчтай гэрэлтүүлгийн хэлхээ">
+<text x="25" y="35" font-size="20" font-weight="bold">220 В AC — виртуал хэлхээ</text>
+
+<rect x="20" y="115" width="105" height="135" rx="9" fill="#dce7f0" stroke="#244e72" stroke-width="2"/>
+<text x="40" y="145" font-size="17">Тэжээл</text>
+<text x="38" y="185" font-size="18">L</text>
+<text x="38" y="230" font-size="18">N</text>
+<circle cx="110" cy="180" r="7" fill="#dc2626"/>
+<circle cx="110" cy="225" r="7" fill="#2563eb"/>
+
+<rect x="205" y="105" width="145" height="155" rx="9" fill="#dbeafe" stroke="#244e72" stroke-width="2"/>
+<text x="225" y="132" font-size="16">Унтраалга S1</text>
+<text id="s1Text" x="250" y="156" font-size="15">Зам 1</text>
+<circle cx="220" cy="195" r="6" fill="#dc2626"/>
+<circle cx="335" cy="177" r="6" fill="#dc2626"/>
+<circle cx="335" cy="225" r="6" fill="#dc2626"/>
+
+<rect x="505" y="105" width="145" height="155" rx="9" fill="#dbeafe" stroke="#244e72" stroke-width="2"/>
+<text x="525" y="132" font-size="16">Унтраалга S2</text>
+<text id="s2Text" x="550" y="156" font-size="15">Зам 1</text>
+<circle cx="520" cy="177" r="6" fill="#dc2626"/>
+<circle cx="520" cy="225" r="6" fill="#dc2626"/>
+<circle cx="635" cy="195" r="6" fill="#dc2626"/>
+
+<rect x="740" y="115" width="135" height="135" rx="9" fill="#e9edf2" stroke="#244e72" stroke-width="2"/>
+<text x="773" y="145" font-size="17">Чийдэн</text>
+<circle id="bulb" cx="810" cy="190" r="32" fill="#cbd5e1" stroke="#64748b" stroke-width="3"/>
+<text x="801" y="200" font-size="28" fill="#334155">×</text>
+<circle cx="755" cy="165" r="6" fill="#dc2626"/>
+<circle cx="755" cy="230" r="6" fill="#2563eb"/>
+
+<path id="phaseWire" d="M117 180 H165 V195 H214" fill="none" stroke="#cbd5e1" stroke-width="5"/>
+<path id="traveler1" d="M341 177 H514" fill="none" stroke="#cbd5e1" stroke-width="5"/>
+<path id="traveler2" d="M341 225 H514" fill="none" stroke="#cbd5e1" stroke-width="5"/>
+<path id="lampPhase" d="M641 195 H690 V165 H749" fill="none" stroke="#cbd5e1" stroke-width="5"/>
+<path id="neutralWire" d="M117 225 H165 V320 H705 V230 H749" fill="none" stroke="#cbd5e1" stroke-width="5"/>
+
+<text x="360" y="167" font-size="14">Холбогч 1</text>
+<text x="360" y="247" font-size="14">Холбогч 2</text>
+<text x="310" y="345" font-size="14" fill="#536477">Өнгөт шугам = холболт баталгаажсан</text>
+</svg>
+</section>
+
+<section>
+<h2>2. Холболтын угсралт</h2>
+<div class="grid">
+<div>
+<label for="phase">Тэжээлийн L дамжуулагч</label>
+<select id="phase">
+<option value="">-- Сонгох --</option>
+<option value="s1common">S1-ийн нийтлэг (COM) клемм</option>
+<option value="lamp">Чийдэнгийн N клемм</option>
+<option value="s2common">S2-ийн нийтлэг (COM) клемм</option>
+</select>
+</div>
+<div>
+<label for="travelers">S1 ба S2-ийн хоорондох холбогч дамжуулагч</label>
+<select id="travelers">
+<option value="">-- Сонгох --</option>
+<option value="correct">S1-L1 → S2-L1, S1-L2 → S2-L2</option>
+<option value="missing">Зөвхөн нэг холбогч дамжуулагч</option>
+<option value="short">Хоёр замыг хооронд нь шууд нэгтгэх</option>
+</select>
+</div>
+<div>
+<label for="lampPhaseSelect">S2-ийн нийтлэг (COM) клемм</label>
+<select id="lampPhaseSelect">
+<option value="">-- Сонгох --</option>
+<option value="lamp">Чийдэнгийн фазын клемм</option>
+<option value="neutral">Тэжээлийн N</option>
+<option value="phase">Тэжээлийн L</option>
+</select>
+</div>
+<div>
+<label for="neutral">Тэжээлийн N дамжуулагч</label>
+<select id="neutral">
+<option value="">-- Сонгох --</option>
+<option value="lamp">Чийдэнгийн N клемм</option>
+<option value="switch">S1-ийн нийтлэг клемм</option>
+<option value="phase">Тэжээлийн L</option>
+</select>
+</div>
+</div>
+<button onclick="checkWiring()">Холболтыг шалгах</button>
+<button onclick="resetLab()">Дахин угсрах</button>
+<div id="feedback" class="result" role="status">
+Дөрвөн холболтыг сонгоод шалгах товчийг дарна уу.
+</div>
+</section>
+
+<section>
+<h2>3. Хоёр унтраалгын ажиллагаа</h2>
+<button id="switch1" onclick="toggleSwitch(1)" disabled>S1-ийг сэлгэх</button>
+<button id="switch2" onclick="toggleSwitch(2)" disabled>S2-ийг сэлгэх</button>
+<p>Унтраалга S1: <strong id="state1">Зам 1</strong></p>
+<p>Унтраалга S2: <strong id="state2">Зам 1</strong></p>
+<p>Чийдэн: <strong id="lampState">Унтарсан</strong></p>
+<p>Ачаалал: <strong>60 W</strong></p>
+<p>Тооцоот гүйдэл: <strong id="current">0.00 A</strong></p>
+<p class="note">I = P / U = 60 / 220 ≈ 0.27 A. Идэвхтэй ачааллын хялбаршуулсан загвар.</p>
+</section>
+
+<section>
+<h2>4. Лабораторийн даалгавар</h2>
+<ol>
+<li>Дөрвөн холболтыг зөв сонгож угсарна.</li>
+<li>S1-ийг сэлгэж, чийдэнгийн төлөвийг ажиглана.</li>
+<li>S2-ийг сэлгэж, чийдэнгийн төлөвийг ажиглана.</li>
+<li>Хоёр унтраалгын дөрвөн боломжит төлөвийг туршина.</li>
+<li>Буруу холболтын алдааны тайлбарыг судална.</li>
+</ol>
+</section>
+
+</main>
+
+<script>
+let wiringOK=false;
+let s1=0;
+let s2=0;
+const $=id=>document.getElementById(id);
+
+function render(){
+$("s1Text").textContent=s1===0?"Зам 1":"Зам 2";
+$("s2Text").textContent=s2===0?"Зам 1":"Зам 2";
+$("state1").textContent=s1===0?"Зам 1":"Зам 2";
+$("state2").textContent=s2===0?"Зам 1":"Зам 2";
+
+const lit=wiringOK && s1===s2;
+$("lampState").textContent=lit?"Ассан":"Унтарсан";
+$("current").textContent=lit?(60/220).toFixed(2)+" A":"0.00 A";
+
+$("bulb").setAttribute("fill",lit?"#fde68a":"#cbd5e1");
+$("bulb").setAttribute("stroke",lit?"#eab308":"#64748b");
+
+$("phaseWire").setAttribute("stroke",wiringOK?"#dc2626":"#cbd5e1");
+$("traveler1").setAttribute("stroke",wiringOK?"#dc2626":"#cbd5e1");
+$("traveler2").setAttribute("stroke",wiringOK?"#dc2626":"#cbd5e1");
+$("lampPhase").setAttribute("stroke",wiringOK?"#dc2626":"#cbd5e1");
+$("neutralWire").setAttribute("stroke",wiringOK?"#2563eb":"#cbd5e1");
+}
+
+function checkWiring(){
+const phase=$("phase").value;
+const travelers=$("travelers").value;
+const lamp=$("lampPhaseSelect").value;
+const neutral=$("neutral").value;
+const errors=[];
+
+if(!phase||!travelers||!lamp||!neutral){
+wiringOK=false;
+$("feedback").className="result bad";
+$("feedback").textContent="Дөрвөн холболтыг бүгдийг сонгоно уу.";
+$("switch1").disabled=true;
+$("switch2").disabled=true;
+render();
+return;
+}
+
+if(phase!=="s1common")
+errors.push("Тэжээлийн L нь S1-ийн нийтлэг COM клеммд холбогдоно.");
+
+if(travelers!=="correct")
+errors.push("S1 ба S2-ийн L1, L2 клеммүүдийг хоёр тусдаа дамжуулагчаар холбоно.");
+
+if(lamp!=="lamp")
+errors.push("S2-ийн COM нь чийдэнгийн фазын клеммд холбогдоно.");
+
+if(neutral!=="lamp")
+errors.push("Тэжээлийн N нь чийдэнгийн N клеммд холбогдоно.");
+
+wiringOK=errors.length===0;
+s1=0;
+s2=0;
+$("switch1").disabled=!wiringOK;
+$("switch2").disabled=!wiringOK;
+
+$("feedback").className="result "+(wiringOK?"ok":"bad");
+$("feedback").textContent=wiringOK?
+"Холболт зөв! S1 ба S2 унтраалгыг ээлжлэн сэлгэж туршина уу.":
+"Холболтын алдаа: "+errors.join(" ");
+
+render();
+}
+
+function toggleSwitch(n){
+if(!wiringOK)return;
+if(n===1)s1=1-s1;
+else s2=1-s2;
+render();
+}
+
+function resetLab(){
+["phase","travelers","lampPhaseSelect","neutral"].forEach(id=>$(id).value="");
+wiringOK=false;
+s1=0;
+s2=0;
+$("switch1").disabled=true;
+$("switch2").disabled=true;
+$("feedback").className="result";
+$("feedback").textContent="Дөрвөн холболтыг сонгоод шалгах товчийг дарна уу.";
+render();
+}
+
+["phase","travelers","lampPhaseSelect","neutral"].forEach(id=>{
+$(id).addEventListener("change",()=>{
+wiringOK=false;
+s1=0;
+s2=0;
+$("switch1").disabled=true;
+$("switch2").disabled=true;
+$("feedback").className="result";
+$("feedback").textContent="Холболт өөрчлөгдсөн. Дахин шалгана уу.";
+render();
+});
+});
+
+render();
+</script>
+</body>
+</html>
