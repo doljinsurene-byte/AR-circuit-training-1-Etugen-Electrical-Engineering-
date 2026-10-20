@@ -48,6 +48,8 @@ button:hover,a:hover{background:#0c5076}
 <button onclick="checkAssembly()">Угсралтыг шалгах</button>
 <button onclick="startTerminalWiring()">Клемм холбох горим</button>
 <button onclick="checkTerminalWiring()">Клеммийн холболтыг шалгах</button>
+<button onclick="undoLastTerminalWire()">Сүүлийн утсыг буцаах</button>
+<button onclick="removeWrongTerminalWires()">Зөвхөн буруу холболтыг арилгах</button>
 <button onclick="clearTerminalWiring()">Холболтыг арилгах</button>
 <div id="terminalWiringStatus">Клемм холбох горимыг эхлүүлнэ үү.</div>
 <div id="info">3D самбарын төхөөрөмжийг сонгоно уу.</div>
@@ -456,6 +458,64 @@ registerTerminal("SUPPLY_PE",-2.45,-1.15,0.90,0x16a34a);
 addTerminalLabel("L 220V",-2.45,2.05,0.95,"#b91c1c");
 addTerminalLabel("N",-2.45,1.42,0.95,"#1d4ed8");
 addTerminalLabel("PE",-2.45,-0.88,0.95,"#15803d");
+  
+/* Нэг утас буцаах болон зөвхөн буруу холболт арилгах */
+
+function removeTerminalConnection(connection) {
+  terminalWires.remove(connection.wire);
+  connection.wire.geometry.dispose();
+  connection.wire.material.dispose();
+
+  terminalConnections = terminalConnections.filter(
+    c => c !== connection
+  );
+}
+
+// Хамгийн сүүлд холбосон ганц утсыг буцаах
+window.undoLastTerminalWire = function() {
+  const status = document.getElementById("terminalWiringStatus");
+
+  if (terminalConnections.length === 0) {
+    status.textContent = "Буцаах холболт байхгүй байна.";
+    return;
+  }
+
+  const last = terminalConnections[terminalConnections.length - 1];
+  removeTerminalConnection(last);
+  selectedTerminal = null;
+
+  status.textContent =
+    "Сүүлийн холболтыг буцаалаа. Бусад утас хэвээр үлдсэн.";
+  status.style.color = "#17324d";
+};
+
+// Зөвхөн буруу холбогдсон утсуудыг арилгах
+window.removeWrongTerminalWires = function() {
+  const status = document.getElementById("terminalWiringStatus");
+
+  const expected = new Set(
+    correctPairs.map(pair => connectionKey(pair[0], pair[1]))
+  );
+
+  const wrongConnections = terminalConnections.filter(
+    connection => !expected.has(connection.key)
+  );
+
+  if (wrongConnections.length === 0) {
+    status.textContent =
+      "Буруу холболт байхгүй. Зөв холболтууд хэвээр байна.";
+    status.style.color = "#166534";
+    return;
+  }
+
+  wrongConnections.forEach(removeTerminalConnection);
+  selectedTerminal = null;
+
+  status.textContent =
+    wrongConnections.length +
+    " буруу холболтыг арилгалаа. Зөв холболтууд хадгалагдсан.";
+  status.style.color = "#166534";
+};
    const raycaster=new THREE.Raycaster();
 
 /* 3D клемм болон холболтын цэгүүд */
