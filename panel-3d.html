@@ -56,11 +56,17 @@ button:hover,a:hover{background:#0c5076}
 </section>
 </main>
 
-<script type="module">
-import * as THREE from
-"https://cdn.jsdelivr.net/npm/three@0.160.1/build/three.module.js";
-import {OrbitControls} from
-"https://cdn.jsdelivr.net/npm/three@0.160.1/examples/jsm/controls/OrbitControls.js";
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.160.1/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.1/examples/jsm/"
+  }
+}
+</script>
+ <script type="module">
+import * as THREE from "three";
+import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 
 const holder=document.getElementById("scene");
 const scene=new THREE.Scene();
