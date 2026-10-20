@@ -1,0 +1,246 @@
+
+<!DOCTYPE html>
+<html lang="mn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ETUGEN - Розеткийн холболтын лаборатори</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,sans-serif;background:#edf3f8;color:#17324d}
+header{background:#103b64;color:white;text-align:center;padding:24px}
+main{max-width:1050px;margin:22px auto;padding:0 15px}
+section{background:white;border-radius:14px;padding:22px;margin-bottom:18px}
+h2{margin-top:0}
+button,a{display:inline-block;background:#146b9b;color:white;border:0;border-radius:8px;padding:11px 16px;margin:5px 4px;text-decoration:none;cursor:pointer}
+button:hover,a:hover{background:#0b4c74}
+select{width:100%;padding:11px;border:1px solid #bac8d6;border-radius:7px}
+label{display:block;margin:12px 0}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+svg{width:100%;height:auto;background:#f8fafc;border:1px solid #dce5ed;border-radius:10px}
+.result{padding:16px;background:#edf3f8;border-radius:8px;margin-top:14px;line-height:1.7}
+.ok{background:#e5f5e9;color:#155b2b}
+.bad{background:#fde8e8;color:#9b1c1c}
+.note{font-size:13px;color:#536477}
+.status{font-size:19px;font-weight:bold}
+@media(max-width:700px){.grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header>
+<h1>ETUGEN CIRCUIT STUDIO</h1>
+<p>Модуль 6 — Розеткийн холболт, хамгаалалт ба алдаа илрүүлэх</p>
+</header>
+<main>
+
+<section>
+<a href="index.html">← Нүүр хуудас</a>
+<a href="professional-lab.html">← Модуль 6</a>
+<h2>Лабораторийн зорилго</h2>
+<p>220 В-ын нэг фазын розеткийн L, N, PE дамжуулагчдын үүргийг ялгаж, холболтын алдааг виртуал орчинд илрүүлэх.</p>
+<p class="note">Анхааруулга: Энэ нь сургалтын хялбаршуулсан загвар. Бодит розеткийн клеммийн байрлал загвараас хамаарна. Хүчдэлтэй төхөөрөмж дээр холболт хийхгүй.</p>
+</section>
+
+<section>
+<h2>1. Виртуал холболтын схем</h2>
+<svg viewBox="0 0 850 340" role="img" aria-label="220 В тэжээл болон L N PE клеммтэй розетк">
+<text x="25" y="36" font-size="20" font-weight="bold">220 В AC — сургалтын схем</text>
+
+<rect x="30" y="90" width="150" height="215" rx="12" fill="#dce7f0" stroke="#244e72" stroke-width="3"/>
+<text x="65" y="122" font-size="20">Тэжээл</text>
+<text x="65" y="169" font-size="19">L</text>
+<text x="65" y="218" font-size="19">N</text>
+<text x="65" y="267" font-size="19">PE</text>
+<circle cx="165" cy="163" r="8" fill="#dc2626"/>
+<circle cx="165" cy="212" r="8" fill="#2563eb"/>
+<circle cx="165" cy="261" r="8" fill="#16a34a"/>
+
+<rect x="585" y="80" width="235" height="240" rx="18" fill="#e8edf3" stroke="#244e72" stroke-width="3"/>
+<text x="650" y="115" font-size="21">Розетк</text>
+<circle cx="710" cy="205" r="70" fill="white" stroke="#64748b" stroke-width="4"/>
+<circle cx="680" cy="205" r="13" fill="#475569"/>
+<circle cx="740" cy="205" r="13" fill="#475569"/>
+<rect x="699" y="153" width="22" height="10" rx="3" fill="#16a34a"/>
+<text x="600" y="156" font-size="17">L</text>
+<text x="600" y="216" font-size="17">N</text>
+<text x="600" y="275" font-size="17">PE</text>
+<circle cx="590" cy="150" r="7" fill="#dc2626"/>
+<circle cx="590" cy="210" r="7" fill="#2563eb"/>
+<circle cx="590" cy="270" r="7" fill="#16a34a"/>
+
+<path id="wireL" d="M173 163 H360 V150 H583" fill="none" stroke="#cbd5e1" stroke-width="6"/>
+<path id="wireN" d="M173 212 H583" fill="none" stroke="#cbd5e1" stroke-width="6"/>
+<path id="wirePE" d="M173 261 H360 V270 H583" fill="none" stroke="#cbd5e1" stroke-width="6"/>
+<text x="280" y="316" font-size="14" fill="#536477">Өнгөт шугам = холболт зөв гэж баталгаажсан</text>
+</svg>
+</section>
+
+<section>
+<h2>2. Дамжуулагчдын холболтыг сонгох</h2>
+<div class="grid">
+<div>
+<label for="phase">L — фазын дамжуулагч</label>
+<select id="phase">
+<option value="">-- Сонгох --</option>
+<option value="L">Розеткийн L клемм</option>
+<option value="N">Розеткийн N клемм</option>
+<option value="PE">Розеткийн PE клемм</option>
+</select>
+</div>
+<div>
+<label for="neutral">N — саармаг дамжуулагч</label>
+<select id="neutral">
+<option value="">-- Сонгох --</option>
+<option value="N">Розеткийн N клемм</option>
+<option value="L">Розеткийн L клемм</option>
+<option value="PE">Розеткийн PE клемм</option>
+</select>
+</div>
+<div>
+<label for="earth">PE — хамгаалалтын дамжуулагч</label>
+<select id="earth">
+<option value="">-- Сонгох --</option>
+<option value="PE">Розеткийн PE клемм</option>
+<option value="N">Розеткийн N клемм</option>
+<option value="L">Розеткийн L клемм</option>
+<option value="open">Холбохгүй орхих</option>
+</select>
+</div>
+</div>
+<button onclick="checkWiring()">Холболтыг шалгах</button>
+<button onclick="resetLab()">Дахин угсрах</button>
+<div id="feedback" class="result" role="status">
+L, N, PE дамжуулагчдын холболтыг сонгоно уу.
+</div>
+</section>
+
+<section>
+<h2>3. Гэмтлийн туршилт</h2>
+<label for="fault">Турших гэмтэл</label>
+<select id="fault">
+<option value="none">Гэмтэлгүй</option>
+<option value="reverse">L ба N солигдсон</option>
+<option value="peopen">PE дамжуулагч тасарсан</option>
+<option value="bond">N ба PE-г розетк дээр буруу нэгтгэсэн</option>
+</select>
+<button onclick="simulateFault()">Гэмтлийг шалгах</button>
+<div id="faultResult" class="result">Гэмтлийн төрлийг сонгоод шалгана уу.</div>
+</section>
+
+<section>
+<h2>4. Хэмжилт ба үр дүн</h2>
+<p>Тэжээлийн хүчдэл: <strong>220 В AC</strong></p>
+<p>Холболтын үнэлгээ: <span id="wiringState" class="status">Шалгаагүй</span></p>
+<p>Аюулгүй ажиллагааны үнэлгээ: <span id="safetyState" class="status">Тодорхойгүй</span></p>
+<p class="note">Энд бодит хүчдэл, тусгаарлагын эсэргүүцэл, газардуулгын тасралтгүй байдал болон хамгаалалтын таслалтын хугацааг хэмжихгүй. Үр дүн нь сонгосон холболтын логик үнэлгээ юм.</p>
+</section>
+
+<section>
+<h2>5. Оюутны даалгавар</h2>
+<ol>
+<li>L, N, PE дамжуулагчдыг зөв клеммд холбоно.</li>
+<li>Холболтыг шалгаж, схемийн өнгө өөрчлөгдөхийг ажиглана.</li>
+<li>L ба N солигдох гэмтлийн үр дагаврыг тайлбарлана.</li>
+<li>PE дамжуулагч тасрах үед хамгаалалтын эрсдэлийг тодорхойлно.</li>
+<li>N ба PE-г розетк дээр буруу нэгтгэхийн аюулыг тайлбарлана.</li>
+</ol>
+</section>
+
+</main>
+
+<script>
+const $=id=>document.getElementById(id);
+let wiringOK=false;
+
+function renderWires(){
+$("wireL").setAttribute("stroke",wiringOK?"#dc2626":"#cbd5e1");
+$("wireN").setAttribute("stroke",wiringOK?"#2563eb":"#cbd5e1");
+$("wirePE").setAttribute("stroke",wiringOK?"#16a34a":"#cbd5e1");
+}
+
+function checkWiring(){
+const l=$("phase").value;
+const n=$("neutral").value;
+const pe=$("earth").value;
+const errors=[];
+
+if(!l||!n||!pe){
+wiringOK=false;
+$("feedback").className="result bad";
+$("feedback").textContent="Гурван дамжуулагчийн холболтыг бүгдийг сонгоно уу.";
+$("wiringState").textContent="Дутуу";
+$("safetyState").textContent="Үнэлэх боломжгүй";
+renderWires();
+return;
+}
+
+if(l!=="L")errors.push("L дамжуулагчийг L клеммд холбоно.");
+if(n!=="N")errors.push("N дамжуулагчийг N клеммд холбоно.");
+if(pe!=="PE")errors.push("PE дамжуулагчийг PE клеммд холбоно.");
+
+wiringOK=errors.length===0;
+$("feedback").className="result "+(wiringOK?"ok":"bad");
+$("feedback").textContent=wiringOK?
+"Зөв! L, N, PE дамжуулагчдын виртуал холболт тохирч байна.":
+"Холболтын алдаа: "+errors.join(" ");
+
+$("wiringState").textContent=wiringOK?"Зөв":"Алдаатай";
+$("safetyState").textContent=wiringOK?
+"Холболтын логик зөв":
+"Холболтын алдаа илэрсэн";
+
+renderWires();
+}
+
+function simulateFault(){
+const fault=$("fault").value;
+const box=$("faultResult");
+let message="";
+let good=false;
+
+if(fault==="none"){
+message="Гэмтэл сонгоогүй. L, N, PE холболтыг шалгана уу.";
+good=true;
+}
+else if(fault==="reverse"){
+message="L ба N солигдсон: туйлшрал буруу. Төхөөрөмж ажиллаж болох ч хамгаалалт, салгалтын зохион байгуулалтаас хамааран аюултай нөхцөл үүсэж болно.";
+}
+else if(fault==="peopen"){
+message="PE тасарсан: хамгаалалтын газардуулгын тасралтгүй байдал алдагдсан. Тусгаарлагын гэмтлийн үед хүрэлцэх хүчдэлийн эрсдэл нэмэгдэнэ.";
+}
+else if(fault==="bond"){
+message="N ба PE-г розетк дээр буруу нэгтгэсэн: хамгаалалтын дамжуулагчаар ажлын гүйдэл урсах, RCD-ийн ажиллагаанд нөлөөлөх болон хүрэлцэх хүчдэлийн эрсдэл үүснэ.";
+}
+
+box.className="result "+(good?"ok":"bad");
+box.textContent=message;
+}
+
+function resetLab(){
+["phase","neutral","earth"].forEach(id=>$(id).value="");
+$("fault").value="none";
+wiringOK=false;
+$("feedback").className="result";
+$("feedback").textContent="L, N, PE дамжуулагчдын холболтыг сонгоно уу.";
+$("faultResult").className="result";
+$("faultResult").textContent="Гэмтлийн төрлийг сонгоод шалгана уу.";
+$("wiringState").textContent="Шалгаагүй";
+$("safetyState").textContent="Тодорхойгүй";
+renderWires();
+}
+
+["phase","neutral","earth"].forEach(id=>{
+$(id).addEventListener("change",()=>{
+wiringOK=false;
+$("wiringState").textContent="Дахин шалгах";
+$("safetyState").textContent="Тодорхойгүй";
+$("feedback").className="result";
+$("feedback").textContent="Холболт өөрчлөгдсөн. Дахин шалгана уу.";
+renderWires();
+});
+});
+
+renderWires();
+</script>
+</body>
+</html>
