@@ -50,6 +50,38 @@ button:hover,a:hover{background:#0c5076}
 </section>
 
 <section>
+<section>
+<h2>3D дамжуулагчийн холболт</h2>
+
+<p>Дамжуулагч бүрийг зориулалтын клеммтэй холбоно.</p>
+
+<label>L — фаз:</label>
+<select id="wireL">
+  <option value="">Сонгох</option>
+  <option value="L">L клемм</option>
+  <option value="N">N клемм</option>
+  <option value="PE">PE клемм</option>
+</select>
+
+<label>N — саармаг:</label>
+<select id="wireN">
+  <option value="">Сонгох</option>
+  <option value="L">L клемм</option>
+  <option value="N">N клемм</option>
+  <option value="PE">PE клемм</option>
+</select>
+
+<label>PE — хамгаалалтын газардуулга:</label>
+<select id="wirePE">
+  <option value="">Сонгох</option>
+  <option value="L">L клемм</option>
+  <option value="N">N клемм</option>
+  <option value="PE">PE клемм</option>
+</select>
+
+<button onclick="check3DWiring()">Холболтыг шалгах</button>
+<div id="wiringResult"></div>
+</section>
 <h2>Угсралтын дараалал</h2>
 <p>1. Самбарын суурь болон DIN рейкийг шалгана.</p>
 <p>2. MCB болон RCD төхөөрөмжүүдийг таньж, байрлалыг судална.</p>
