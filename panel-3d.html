@@ -216,6 +216,89 @@ for(const dx of [-0.17,0.17]){
  clickable.push(hole);
 }
 
+
+/* L, N, PE — 3D сургалтын холболт */
+
+const wiringGroup = new THREE.Group();
+scene.add(wiringGroup);
+
+function draw3DWire(points, color) {
+  const curve = new THREE.CatmullRomCurve3(
+    points.map(p => new THREE.Vector3(...p))
+  );
+
+  const geometry = new THREE.TubeGeometry(
+    curve, 32, 0.035, 8, false
+  );
+
+  const material = new THREE.MeshStandardMaterial({
+    color: color
+  });
+
+  const wire = new THREE.Mesh(geometry, material);
+  wiringGroup.add(wire);
+}
+
+window.check3DWiring = function() {
+  const L = document.getElementById("wireL").value;
+  const N = document.getElementById("wireN").value;
+  const PE = document.getElementById("wirePE").value;
+  const result = document.getElementById("wiringResult");
+
+  // Өмнөх дүрслэлийг арилгах
+  while (wiringGroup.children.length > 0) {
+    const obj = wiringGroup.children[0];
+    wiringGroup.remove(obj);
+    obj.geometry.dispose();
+    obj.material.dispose();
+  }
+
+  if (!mcbInstalled || !rcdInstalled) {
+    result.textContent =
+      "Эхлээд MCB болон RCD төхөөрөмжүүдийг угсарна уу.";
+    return;
+  }
+
+  if (!L || !N || !PE) {
+    result.textContent =
+      "L, N, PE дамжуулагч бүрийн клеммийг сонгоно уу.";
+    return;
+  }
+
+  if (L !== "L" || N !== "N" || PE !== "PE") {
+    result.textContent =
+      "Холболт буруу байна. L, N, PE клеммүүдийг шалгана уу.";
+    return;
+  }
+
+  // L — улаан дамжуулагч
+  draw3DWire([
+    [-2.5, 1.65, 0.65],
+    [-1.55, 1.65, 0.65],
+    [-1.55, 1.25, 0.65]
+  ], 0xdc2626);
+
+  // N — цэнхэр дамжуулагч
+  draw3DWire([
+    [0.1, 1.7, 0.65],
+    [0.65, 1.4, 0.65],
+    [1.4, 0.3, 0.65],
+    [1.8, -0.45, 0.45]
+  ], 0x2563eb);
+
+  // PE — ногоон/шар өнгийн хамгаалалтын дамжуулагчийн
+  // хялбаршуулсан ногоон дүрслэл
+  draw3DWire([
+    [-2.4, -1.65, 0.25],
+    [0.0, -1.65, 0.4],
+    [1.3, -1.65, 0.45],
+    [1.8, -1.5, 0.45]
+  ], 0x16a34a);
+
+  result.textContent =
+    "Зөв! L, N, PE холболтын сургалтын 3D дүрслэл гарлаа.";
+  result.style.color = "#166534";
+};
 const raycaster=new THREE.Raycaster();
 const pointer=new THREE.Vector2();
 
