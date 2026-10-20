@@ -39,6 +39,7 @@ button:hover,a:hover{background:#0c5076}
 <section>
 <h2>Төхөөрөмж сонгох</h2>
 <button onclick="showPart('mcb')">MCB автомат таслуур</button>
+<button onclick="installMCB()">MCB-г DIN рейк дээр угсрах</button>
 <button onclick="showPart('rcd')">RCD хамгаалалт</button>
 <button onclick="showPart('socket')">Розетк</button>
 <button onclick="showPart('rail')">DIN рейк</button>
@@ -112,9 +113,16 @@ box("rail",5.7,4.3,0.18,0,0,-0.55,0xb7c4d1);
 // DIN рейк
 box("rail",4.8,0.20,0.23,0,0.75,-0.32,0x7b8794);
 
-// MCB
-box("mcb",0.85,1.75,0.72,-1.55,0.75,0.16,0xf8fafc);
-box("mcb",0.36,0.43,0.13,-1.55,0.9,0.59,0x252c38);
+// MCB — угсралтаар байрлуулах төхөөрөмж
+const mcbBody = box("mcb",0.85,1.75,0.72,-1.55,-2.8,0.16,0xf8fafc);
+const mcbSwitch = box("mcb",0.36,0.43,0.13,-1.55,-2.65,0.59,0x252c38);
+
+window.installMCB = function(){
+  mcbBody.position.y = 0.75;
+  mcbSwitch.position.y = 0.9;
+  document.getElementById("info").textContent =
+    "MCB автомат таслуурыг DIN рейк дээр байрлууллаа.";
+};
 
 // RCD
 box("rcd",1.5,1.75,0.72,0.1,0.75,0.16,0xf1f5f9);
