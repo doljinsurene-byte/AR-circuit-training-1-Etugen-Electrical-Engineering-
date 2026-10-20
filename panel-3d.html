@@ -1,0 +1,186 @@
+
+<!DOCTYPE html>
+<html lang="mn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ETUGEN — 3D цахилгаан самбар</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,sans-serif;background:#edf3f8;color:#18344d}
+header{background:#103b64;color:white;text-align:center;padding:18px}
+header h1{margin:0 0 8px}
+main{max-width:1150px;margin:auto;padding:16px}
+section{background:white;padding:18px;border-radius:12px;margin-bottom:16px}
+a,button{display:inline-block;padding:10px 14px;background:#176d9d;color:white;text-decoration:none;border:0;border-radius:7px;margin:4px;cursor:pointer}
+button:hover,a:hover{background:#0c5076}
+#scene{height:460px;width:100%;border-radius:10px;background:#e3eaf0;overflow:hidden}
+#info{padding:15px;background:#edf3f8;border-radius:8px;min-height:75px;line-height:1.6}
+#status{font-weight:bold}
+.note{font-size:13px;color:#526578}
+@media(max-width:600px){#scene{height:360px}}
+</style>
+</head>
+<body>
+<header>
+<h1>ETUGEN CIRCUIT STUDIO</h1>
+<div>Модуль 6 — Цахилгаан самбарын 3D угсралтын сургалт</div>
+</header>
+<main>
+<section>
+<a href="index.html">← Нүүр</a>
+<a href="professional-lab.html">← Модуль 6</a>
+<h2>3D самбарын бүтэц</h2>
+<p>Хулганаар чирж эргүүлэх, дугуйгаар томруулах, төхөөрөмж дээр дарж тайлбарыг үзэх боломжтой.</p>
+<div id="scene"></div>
+<p id="status">3D орчныг ачаалж байна...</p>
+</section>
+
+<section>
+<h2>Төхөөрөмж сонгох</h2>
+<button onclick="showPart('mcb')">MCB автомат таслуур</button>
+<button onclick="showPart('rcd')">RCD хамгаалалт</button>
+<button onclick="showPart('socket')">Розетк</button>
+<button onclick="showPart('rail')">DIN рейк</button>
+<button onclick="resetCamera()">Харагдацыг сэргээх</button>
+<div id="info">3D самбарын төхөөрөмжийг сонгоно уу.</div>
+</section>
+
+<section>
+<h2>Угсралтын дараалал</h2>
+<p>1. Самбарын суурь болон DIN рейкийг шалгана.</p>
+<p>2. MCB болон RCD төхөөрөмжүүдийг таньж, байрлалыг судална.</p>
+<p>3. L, N, PE дамжуулагчдын зориулалтыг тодорхойлно.</p>
+<p>4. Розеткийн хэлхээний хамгаалалтын зарчмыг тайлбарлана.</p>
+<p class="note">Энэ хувилбар нь 3D танилцах загвар. Бодит цахилгаан холболт, хамгаалалтын сонголт, хүчдэлтэй туршилтыг дуурайлган гүйцэтгэхгүй.</p>
+</section>
+</main>
+
+<script type="module">
+import * as THREE from
+"https://cdn.jsdelivr.net/npm/three@0.160.1/build/three.module.js";
+import {OrbitControls} from
+"https://cdn.jsdelivr.net/npm/three@0.160.1/examples/jsm/controls/OrbitControls.js";
+
+const holder=document.getElementById("scene");
+const scene=new THREE.Scene();
+scene.background=new THREE.Color(0xe3eaf0);
+
+const camera=new THREE.PerspectiveCamera(
+45,holder.clientWidth/holder.clientHeight,0.1,100
+);
+camera.position.set(5,4,8);
+
+const renderer=new THREE.WebGLRenderer({antialias:true});
+renderer.setSize(holder.clientWidth,holder.clientHeight);
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+holder.appendChild(renderer.domElement);
+
+const controls=new OrbitControls(camera,renderer.domElement);
+controls.enableDamping=true;
+controls.target.set(0,0,0);
+
+scene.add(new THREE.HemisphereLight(0xffffff,0x718096,2));
+
+const light=new THREE.DirectionalLight(0xffffff,2);
+light.position.set(4,8,6);
+scene.add(light);
+
+const clickable=[];
+
+function box(name,w,h,d,x,y,z,color){
+ const mesh=new THREE.Mesh(
+  new THREE.BoxGeometry(w,h,d),
+  new THREE.MeshStandardMaterial({color})
+ );
+ mesh.position.set(x,y,z);
+ mesh.userData.part=name;
+ scene.add(mesh);
+ if(name)clickable.push(mesh);
+ return mesh;
+}
+
+// Самбарын суурь
+box("rail",5.7,4.3,0.18,0,0,-0.55,0xb7c4d1);
+
+// DIN рейк
+box("rail",4.8,0.20,0.23,0,0.75,-0.32,0x7b8794);
+
+// MCB
+box("mcb",0.85,1.75,0.72,-1.55,0.75,0.16,0xf8fafc);
+box("mcb",0.36,0.43,0.13,-1.55,0.9,0.59,0x252c38);
+
+// RCD
+box("rcd",1.5,1.75,0.72,0.1,0.75,0.16,0xf1f5f9);
+box("rcd",0.45,0.42,0.13,0.1,0.92,0.59,0x252c38);
+box("rcd",0.20,0.20,0.12,0.55,0.30,0.59,0xeab308);
+
+// Розетк
+box("socket",1.25,1.35,0.42,1.8,-1.1,0.0,0xffffff);
+
+const socketFace=new THREE.Mesh(
+ new THREE.CircleGeometry(0.42,48),
+ new THREE.MeshStandardMaterial({color:0xe2e8f0})
+);
+socketFace.position.set(1.8,-1.1,0.225);
+socketFace.userData.part="socket";
+scene.add(socketFace);
+clickable.push(socketFace);
+
+for(const dx of [-0.17,0.17]){
+ const hole=new THREE.Mesh(
+  new THREE.CircleGeometry(0.07,24),
+  new THREE.MeshBasicMaterial({color:0x334155})
+ );
+ hole.position.set(1.8+dx,-1.1,0.235);
+ hole.userData.part="socket";
+ scene.add(hole);
+ clickable.push(hole);
+}
+
+const raycaster=new THREE.Raycaster();
+const pointer=new THREE.Vector2();
+
+renderer.domElement.addEventListener("click",event=>{
+ const rect=renderer.domElement.getBoundingClientRect();
+ pointer.x=((event.clientX-rect.left)/rect.width)*2-1;
+ pointer.y=-((event.clientY-rect.top)/rect.height)*2+1;
+ raycaster.setFromCamera(pointer,camera);
+ const hit=raycaster.intersectObjects(clickable);
+ if(hit.length)window.showPart(hit[0].object.userData.part);
+});
+
+const descriptions={
+ mcb:"MCB — хэт ачаалал болон богино залгааны гүйдлээс хэлхээг хамгаалах автомат таслуур.",
+ rcd:"RCD — фаз ба саармаг дамжуулагчийн гүйдлийн зөрүүг хянаж, үлдэгдэл гүйдэл үүсэхэд хэлхээг таслах хамгаалалтын төхөөрөмж.",
+ socket:"Розетк — хэрэглэгчийн төхөөрөмжийг тэжээлд холбох хэрэгсэл. L, N, PE дамжуулагчдын зориулалтыг зөв ялгах шаардлагатай.",
+ rail:"DIN рейк — самбар дотор модуль төхөөрөмжүүдийг бэхлэх зориулалттай металл суурь."
+};
+
+window.showPart=function(part){
+ document.getElementById("info").textContent=descriptions[part];
+};
+
+window.resetCamera=function(){
+ camera.position.set(5,4,8);
+ controls.target.set(0,0,0);
+ controls.update();
+};
+
+window.addEventListener("resize",()=>{
+ const w=holder.clientWidth,h=holder.clientHeight;
+ camera.aspect=w/h;
+ camera.updateProjectionMatrix();
+ renderer.setSize(w,h);
+});
+
+document.getElementById("status").textContent=
+"3D орчин бэлэн — самбарыг эргүүлж, төхөөрөмж сонгоно уу.";
+
+renderer.setAnimationLoop(()=>{
+ controls.update();
+ renderer.render(scene,camera);
+});
+</script>
+</body>
+</html>
