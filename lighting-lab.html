@@ -37,13 +37,13 @@ svg{width:100%;height:auto;background:#f8fafc;border:1px solid #dce5ed;border-ra
 <a href="professional-lab.html">← Модуль 6</a>
 <h2>Лабораторийн зорилго</h2>
 <p>Нэг туйлт унтраалгаар гэрлийн чийдэн удирдах хэлхээг угсарч, фазын болон саармаг дамжуулагчийн зөв холболтыг тогтоох.</p>
-<p class="note">Энэ нь 230 В-ын бодит төхөөрөмж угсрах заавар биш, сургалтын виртуал загвар юм. Бодит угсралтыг зөвхөн хүчдэлгүй нөхцөлд, эрх бүхий багшийн хяналтад гүйцэтгэнэ.</p>
+<p class="note">Энэ нь 220 В-ын бодит төхөөрөмж угсрах заавар биш, сургалтын виртуал загвар юм. Бодит угсралтыг зөвхөн хүчдэлгүй нөхцөлд, эрх бүхий багшийн хяналтад гүйцэтгэнэ.</p>
 </section>
 
 <section>
 <h2>1. Холболтын схем</h2>
 <svg viewBox="0 0 760 320" aria-label="Тэжээл, унтраалга, чийдэнгийн виртуал схем">
-<text x="28" y="37" font-size="18" font-weight="bold">230 В AC — виртуал хэлхээ</text>
+<text x="28" y="37" font-size="18" font-weight="bold">220 В AC — виртуал хэлхээ</text>
 <rect x="25" y="100" width="110" height="125" rx="10" fill="#dce7f0" stroke="#244e72" stroke-width="2"/>
 <text x="45" y="125" font-size="16">Тэжээл</text>
 <circle cx="115" cy="160" r="7" fill="#dc2626"/>
@@ -114,7 +114,7 @@ svg{width:100%;height:auto;background:#f8fafc;border:1px solid #dce5ed;border-ra
 <p>Гэрлийн чийдэн: <strong id="lampState">Унтарсан</strong></p>
 <p>Ачаалал: <strong>60 W</strong></p>
 <p>Ажиллах үеийн тооцоот гүйдэл: <strong id="current">0.00 A</strong></p>
-<p class="note">I = P / U = 60 / 230 ≈ 0.26 A. Чийдэнг идэвхтэй ачаалал гэж хялбаршуулсан.</p>
+<p class="note">I = P / U = 60 / 220 ≈ 0.27 A. Чийдэнг идэвхтэй ачаалал гэж хялбаршуулсан.</p>
 </section>
 
 <section>
@@ -138,7 +138,7 @@ $("switchText").textContent=switchOn?"Залгасан":"Салгасан";
 $("state").textContent=switchOn?"Залгасан":"Салгасан";
 const lit=wiringOK&&switchOn;
 $("lampState").textContent=lit?"Ассан":"Унтарсан";
-$("current").textContent=lit?(60/230).toFixed(2)+" A":"0.00 A";
+$("current").textContent=lit?(60/220).toFixed(2)+" A":"0.00 A";
 $("bulb").setAttribute("fill",lit?"#fde68a":"#cbd5e1");
 $("bulb").setAttribute("stroke",lit?"#eab308":"#64748b");
 $("phaseWire").setAttribute("stroke",wiringOK?"#dc2626":"#cbd5e1");
