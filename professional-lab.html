@@ -60,7 +60,7 @@ svg{width:100%;height:auto;background:#f8fafc;border-radius:10px}
 </section>
 <section>
 <h2>3. Хэмжилт ба үр дүн</h2>
-<p>Тэжээлийн хүчдэл: <strong>230 В</strong></p>
+<p>Тэжээлийн хүчдэл: <strong>220 В</strong></p>
 <p>Тооцоолсон гүйдэл: <span id="current" class="result">4.35 A</span></p>
 <p>Автомат таслуур: <strong id="mcbState">Залгасан</strong></p>
 <p>RCD хамгаалалт: <strong id="rcdState">Залгасан</strong></p>
@@ -84,7 +84,7 @@ simulate();
 leakage.addEventListener("change",simulate);
 function simulate(){
 const p=Number(power.value);
-const i=p/230;
+const i=p/220;
 const mcbTrip=i>16;
 const rcdTrip=leakage.checked;
 document.getElementById("current").textContent=i.toFixed(2)+" A";
