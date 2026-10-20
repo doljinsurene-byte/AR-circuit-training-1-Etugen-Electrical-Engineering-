@@ -1,0 +1,205 @@
+
+<!DOCTYPE html>
+<html lang="mn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ETUGEN - Гэрэлтүүлгийн хэлхээ</title>
+<style>
+*{box-sizing:border-box}
+body{font-family:Arial,sans-serif;margin:0;background:#edf3f8;color:#17324d}
+header{background:#103b64;color:white;padding:22px;text-align:center}
+main{max-width:1050px;margin:22px auto;padding:0 15px}
+section{background:white;padding:22px;border-radius:14px;margin-bottom:18px}
+h2{margin-top:0}
+button,a{background:#146b9b;color:white;border:0;border-radius:8px;padding:11px 16px;cursor:pointer;text-decoration:none;display:inline-block;margin:5px 4px}
+button:hover,a:hover{background:#0b4c74}
+button:disabled{opacity:.5;cursor:not-allowed}
+select{padding:10px;border:1px solid #bac8d6;border-radius:7px;width:100%;max-width:430px}
+label{display:block;margin:12px 0}
+svg{width:100%;height:auto;background:#f8fafc;border:1px solid #dce5ed;border-radius:10px}
+.result{padding:15px;border-radius:8px;background:#edf3f8;margin-top:14px;line-height:1.7}
+.ok{background:#e5f5e9;color:#155b2b}
+.bad{background:#fde8e8;color:#9b1c1c}
+.note{font-size:13px;color:#536477}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:700px){.grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header>
+<h1>ETUGEN CIRCUIT STUDIO</h1>
+<p>Модуль 6 — Гэрэлтүүлгийн хэлхээний угсралт</p>
+</header>
+<main>
+<section>
+<a href="index.html">← Нүүр хуудас</a>
+<a href="professional-lab.html">← Модуль 6</a>
+<h2>Лабораторийн зорилго</h2>
+<p>Нэг туйлт унтраалгаар гэрлийн чийдэн удирдах хэлхээг угсарч, фазын болон саармаг дамжуулагчийн зөв холболтыг тогтоох.</p>
+<p class="note">Энэ нь 230 В-ын бодит төхөөрөмж угсрах заавар биш, сургалтын виртуал загвар юм. Бодит угсралтыг зөвхөн хүчдэлгүй нөхцөлд, эрх бүхий багшийн хяналтад гүйцэтгэнэ.</p>
+</section>
+
+<section>
+<h2>1. Холболтын схем</h2>
+<svg viewBox="0 0 760 320" aria-label="Тэжээл, унтраалга, чийдэнгийн виртуал схем">
+<text x="28" y="37" font-size="18" font-weight="bold">230 В AC — виртуал хэлхээ</text>
+<rect x="25" y="100" width="110" height="125" rx="10" fill="#dce7f0" stroke="#244e72" stroke-width="2"/>
+<text x="45" y="125" font-size="16">Тэжээл</text>
+<circle cx="115" cy="160" r="7" fill="#dc2626"/>
+<circle cx="115" cy="205" r="7" fill="#2563eb"/>
+<text x="44" y="165" font-size="16">L</text>
+<text x="44" y="210" font-size="16">N</text>
+
+<rect x="280" y="108" width="130" height="105" rx="10" fill="#dbeafe" stroke="#1d4d75" stroke-width="2"/>
+<text x="304" y="133" font-size="16">Унтраалга</text>
+<text id="switchText" x="315" y="164" font-size="15">Салгасан</text>
+<circle cx="295" cy="183" r="6" fill="#dc2626"/>
+<circle cx="395" cy="183" r="6" fill="#dc2626"/>
+
+<rect x="580" y="100" width="145" height="125" rx="10" fill="#e9edf2" stroke="#244e72" stroke-width="2"/>
+<text x="620" y="125" font-size="16">Чийдэн</text>
+<circle id="bulb" cx="650" cy="172" r="29" fill="#cbd5e1" stroke="#64748b" stroke-width="3"/>
+<text id="bulbMark" x="642" y="181" font-size="25" fill="#334155">×</text>
+<circle cx="594" cy="145" r="6" fill="#dc2626"/>
+<circle cx="594" cy="204" r="6" fill="#2563eb"/>
+
+<path id="phaseWire" d="M122 160 L215 160 L215 183 L289 183" fill="none" stroke="#cbd5e1" stroke-width="5"/>
+<path id="returnWire" d="M401 183 L490 183 L490 145 L588 145" fill="none" stroke="#cbd5e1" stroke-width="5"/>
+<path id="neutralWire" d="M122 205 L240 205 L240 270 L540 270 L540 204 L588 204" fill="none" stroke="#cbd5e1" stroke-width="5"/>
+<text x="220" y="295" font-size="13" fill="#536477">Өнгөт шугам = зөв холболт баталгаажсан</text>
+</svg>
+</section>
+
+<section>
+<h2>2. Дамжуулагчийг холбоно</h2>
+<div class="grid">
+<div>
+<label for="phase">L — фазын дамжуулагчийг хаана холбох вэ?</label>
+<select id="phase">
+<option value="">-- Сонгох --</option>
+<option value="switch">Унтраалгын оролт</option>
+<option value="lamp">Чийдэнгийн шууд оролт</option>
+<option value="neutral">N дамжуулагч</option>
+</select>
+</div>
+<div>
+<label for="returnWireSelect">Унтраалгын гаралтыг хаана холбох вэ?</label>
+<select id="returnWireSelect">
+<option value="">-- Сонгох --</option>
+<option value="lamp">Чийдэнгийн фазын оролт</option>
+<option value="neutral">N дамжуулагч</option>
+<option value="source">Тэжээлийн L оролт</option>
+</select>
+</div>
+<div>
+<label for="neutral">N — саармаг дамжуулагчийг хаана холбох вэ?</label>
+<select id="neutral">
+<option value="">-- Сонгох --</option>
+<option value="lamp">Чийдэнгийн N оролт</option>
+<option value="switch">Унтраалгын оролт</option>
+<option value="phase">L дамжуулагч</option>
+</select>
+</div>
+</div>
+<button onclick="checkWiring()">Холболтыг шалгах</button>
+<button onclick="resetLab()">Дахин угсрах</button>
+<div id="feedback" class="result" role="status">Холболтын гурван сонголтыг хийж, шалгах товчийг дарна уу.</div>
+</section>
+
+<section>
+<h2>3. Унтраалгын ажиллагаа</h2>
+<button id="toggleButton" onclick="toggleSwitch()" disabled>Унтраалгыг залгах / салгах</button>
+<p>Унтраалгын төлөв: <strong id="state">Салгасан</strong></p>
+<p>Гэрлийн чийдэн: <strong id="lampState">Унтарсан</strong></p>
+<p>Ачаалал: <strong>60 W</strong></p>
+<p>Ажиллах үеийн тооцоот гүйдэл: <strong id="current">0.00 A</strong></p>
+<p class="note">I = P / U = 60 / 230 ≈ 0.26 A. Чийдэнг идэвхтэй ачаалал гэж хялбаршуулсан.</p>
+</section>
+
+<section>
+<h2>4. Оюутны даалгавар</h2>
+<ol>
+<li>Фазын дамжуулагч унтраалгаар дамжих зөв холболтыг сонгоно.</li>
+<li>Саармаг дамжуулагчийг чийдэнд холбож шалгана.</li>
+<li>Унтраалгыг залгаж, чийдэн асах эсэхийг ажиглана.</li>
+<li>Унтраалгыг салгаж, гүйдэл өөрчлөгдөхийг тэмдэглэнэ.</li>
+<li>Буруу холболт сонгож, алдааны тайлбарыг харьцуулна.</li>
+</ol>
+</section>
+</main>
+<script>
+let wiringOK=false;
+let switchOn=false;
+const $=id=>document.getElementById(id);
+
+function render(){
+$("switchText").textContent=switchOn?"Залгасан":"Салгасан";
+$("state").textContent=switchOn?"Залгасан":"Салгасан";
+const lit=wiringOK&&switchOn;
+$("lampState").textContent=lit?"Ассан":"Унтарсан";
+$("current").textContent=lit?(60/230).toFixed(2)+" A":"0.00 A";
+$("bulb").setAttribute("fill",lit?"#fde68a":"#cbd5e1");
+$("bulb").setAttribute("stroke",lit?"#eab308":"#64748b");
+$("phaseWire").setAttribute("stroke",wiringOK?"#dc2626":"#cbd5e1");
+$("returnWire").setAttribute("stroke",wiringOK?"#dc2626":"#cbd5e1");
+$("neutralWire").setAttribute("stroke",wiringOK?"#2563eb":"#cbd5e1");
+}
+
+function checkWiring(){
+switchOn=false;
+const phase=$("phase").value;
+const ret=$("returnWireSelect").value;
+const neutral=$("neutral").value;
+const errors=[];
+if(!phase||!ret||!neutral){
+$("feedback").className="result bad";
+$("feedback").textContent="Гурван холболтыг бүгдийг сонгоно уу.";
+wiringOK=false;
+$("toggleButton").disabled=true;
+render();
+return;
+}
+if(phase!=="switch") errors.push("Фазын L дамжуулагчийг унтраалгын оролтод холбоно.");
+if(ret!=="lamp") errors.push("Унтраалгын гаралтыг чийдэнгийн фазын оролтод холбоно.");
+if(neutral!=="lamp") errors.push("Саармаг N дамжуулагчийг чийдэнгийн N оролтод холбоно.");
+wiringOK=errors.length===0;
+$("toggleButton").disabled=!wiringOK;
+$("feedback").className="result "+(wiringOK?"ok":"bad");
+$("feedback").textContent=wiringOK?
+"Зөв угсарсан! Одоо унтраалгыг залгаж, чийдэнгийн ажиллагааг туршина уу.":
+"Холболтын алдаа: "+errors.join(" ");
+render();
+}
+
+function toggleSwitch(){
+if(!wiringOK)return;
+switchOn=!switchOn;
+render();
+}
+
+function resetLab(){
+$("phase").value="";
+$("returnWireSelect").value="";
+$("neutral").value="";
+wiringOK=false;
+switchOn=false;
+$("toggleButton").disabled=true;
+$("feedback").className="result";
+$("feedback").textContent="Холболтын гурван сонголтыг хийж, шалгах товчийг дарна уу.";
+render();
+}
+["phase","returnWireSelect","neutral"].forEach(id=>{
+$(id).addEventListener("change",()=>{
+wiringOK=false;
+switchOn=false;
+$("toggleButton").disabled=true;
+$("feedback").className="result";
+$("feedback").textContent="Сонголт өөрчлөгдсөн. Холболтыг дахин шалгана уу.";
+render();
+});
+});
+render();
+</script>
+</body>
+</html>
