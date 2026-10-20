@@ -346,9 +346,12 @@ registerTerminal("PE_BUS",-1.90,-1.65,0.65,0x16a34a);
 
 // Холболтын зөв хосууд
 const correctPairs = [
+  ["SUPPLY_L","MCB_L_IN"],
   ["MCB_L_OUT","RCD_L_IN"],
+  ["SUPPLY_N","RCD_N_IN"],
   ["RCD_L_OUT","SOCKET_L"],
   ["RCD_N_OUT","SOCKET_N"],
+  ["SUPPLY_PE","PE_BUS"],
   ["PE_BUS","SOCKET_PE"]
 ];
 
@@ -445,6 +448,14 @@ window.clearTerminalWiring = function(){
   document.getElementById("terminalWiringStatus").textContent =
     "Холболтууд ариллаа.";
 };
+   // 220 В тэжээлийн оролтын клеммүүд
+registerTerminal("SUPPLY_L",-2.45,1.65,0.90,0xdc2626);
+registerTerminal("SUPPLY_N",-2.45,1.15,0.90,0x2563eb);
+registerTerminal("SUPPLY_PE",-2.45,-1.15,0.90,0x16a34a);
+
+addTerminalLabel("L 220V",-2.45,2.05,0.95,"#b91c1c");
+addTerminalLabel("N",-2.45,1.42,0.95,"#1d4ed8");
+addTerminalLabel("PE",-2.45,-0.88,0.95,"#15803d");
    const raycaster=new THREE.Raycaster();
 
 /* 3D клемм болон холболтын цэгүүд */
