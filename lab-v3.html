@@ -113,7 +113,8 @@ $(&#x27;controls&#x27;).before(labSwitch);labSwitch.onclick=()=&gt;setSwitch(!sw
 const status=document.createElement(&#x27;p&#x27;);status.id=&#x27;switchNote&#x27;;status.style.cssText=&#x27;font-size:13px;color:#52685e;margin:4px 0 10px&#x27;;status.textContent=&#x27;S1 салгаатай. Залгахад хэлхээ ажиллана.&#x27;;labSwitch.after(status);
 const priorRefresh=refresh;refresh=function(){priorRefresh();status.textContent=switchOn?&#x27;S1 залгаатай — виртуал хэмжилт идэвхтэй.&#x27;:&#x27;S1 салгаатай — хэлхээний гүйдэл 0 А.&#x27;;};
 const priorRender=render;render=function(i){priorRender(i);labSwitch.textContent=&#x27;S1 унтраалга залгах&#x27;;labSwitch.setAttribute(&#x27;aria-pressed&#x27;,&#x27;false&#x27;);status.textContent=&#x27;S1 салгаатай. Залгахад хэлхээ ажиллана.&#x27;;document.dispatchEvent(new Event(&#x27;lab-state-changed&#x27;));};
-let previous=performance.now();setInterval(()=&gt;{let now=performance.now(),dt=Math.min((now-previous)/1000,.25);previous=now;if(!switchOn||labs[idx].type!==&#x27;rc&#x27;)return;elapsed=Math.min(20,elapsed+dt);vals.t=elapsed;let inp=document.querySelector(&#x27;[data-param=&quot;t&quot;]&#x27;);if(inp){inp.value=String(elapsed);inp.parentElement.querySelector(&#x27;output&#x27;).textContent=elapsed.toFixed(1);}refresh();},100);
+// RC хугацааг оюутан гулсагчаар өөрөө тохируулна.
+// Хугацааг автоматаар нэмэхгүй.
 &lt;/script&gt;&lt;script&gt;
 (function(){
 const $id=id=&gt;document.getElementById(id), svg=$id(&#x27;circuit2d&#x27;), stage=$id(&#x27;scene&#x27;);
