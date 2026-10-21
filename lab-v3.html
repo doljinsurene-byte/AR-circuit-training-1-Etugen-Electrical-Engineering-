@@ -137,18 +137,6 @@ $(&#x27;controls&#x27;).before(labSwitch);labSwitch.onclick=()=&gt;setSwitch(!sw
 const status=document.createElement(&#x27;p&#x27;);status.id=&#x27;switchNote&#x27;;status.style.cssText=&#x27;font-size:13px;color:#52685e;margin:4px 0 10px&#x27;;status.textContent=&#x27;S1 салгаатай. Залгахад хэлхээ ажиллана.&#x27;;labSwitch.after(status);
 const priorRefresh=refresh;refresh=function(){priorRefresh();status.textContent=switchOn?&#x27;S1 залгаатай — виртуал хэмжилт идэвхтэй.&#x27;:&#x27;S1 салгаатай — хэлхээний гүйдэл 0 А.&#x27;;};
 const priorRender=render;render=function(i){priorRender(i);labSwitch.textContent=&#x27;S1 унтраалга залгах&#x27;;labSwitch.setAttribute(&#x27;aria-pressed&#x27;,&#x27;false&#x27;);status.textContent=&#x27;S1 салгаатай. Залгахад хэлхээ ажиллана.&#x27;;document.dispatchEvent(new Event(&#x27;lab-state-changed&#x27;));};
-if(labs[i].type==='rc'){
-  const modeLabel=document.createElement('label');
-  modeLabel.textContent='RC горим: ';
-
-  const modeSelect=document.createElement('select');
-  modeSelect.innerHTML=`
-    <option value="charge">Цэнэглэх</option>
-    <option value="discharge">Цэнэг алдах</option>
-  `;
-
-  modeSelect.value=rcMode;
-
   modeSelect.addEventListener('change',function(){
     rcMode=this.value;
     refresh();
