@@ -83,7 +83,31 @@ let idx=0,vals={},lastMeasure=&#x27;&#x27;,switchOn=false,elapsed=0;window.labSw
 if(l.type===&#x27;single&#x27;){I=U/R1;i1=I;detail=`I = ${(I*1000).toFixed(2)} мА, P = ${(U*I).toFixed(3)} Вт`;question=&#x27;Гүйдлийг мА-аар бодно уу&#x27;;answer=I*1000}
 if(l.type===&#x27;series&#x27;){req=R1+R2;I=U/req;i1=I;i2=I;v1=I*R1;v2=I*R2;detail=`U1=${v1.toFixed(2)} В, U2=${v2.toFixed(2)} В; U1+U2=${U.toFixed(2)} В`;question=&#x27;R2 дээрх хүчдэлийг В-оор бодно уу&#x27;;answer=v2}
 if(l.type===&#x27;parallel&#x27;||l.type===&#x27;kirchhoff&#x27;){req=R1*R2/(R1+R2);i1=U/R1;i2=U/R2;I=i1+i2;v1=U;v2=U;detail=`I1=${(i1*1000).toFixed(2)} мА, I2=${(i2*1000).toFixed(2)} мА, Iнийт=${(I*1000).toFixed(2)} мА`;question=&#x27;Нийт гүйдлийг мА-аар бодно уу&#x27;;answer=I*1000}
-if(l.type===&#x27;rc&#x27;){const R=R1*1000,C=+vals.C*1e-6,t=+vals.t;req=R;I=U/R*Math.exp(-t/(R*C));i1=I;v1=U*(1-Math.exp(-t/(R*C)));v2=U-v1;detail=`τ=RC=${(R*C).toFixed(2)} с; Uc=${v1.toFixed(3)} В; I=${(I*1000).toFixed(3)} мА`;question=&#x27;Конденсаторын хүчдэлийг В-оор бодно уу&#x27;;answer=v1}
+
+if(l.type==='rc'){
+  const R=R1*1000;
+  const C=+vals.C*1e-6;
+  const t=+vals.t;
+  const tau=R*C;
+  const e=Math.exp(-t/tau);
+  req=R;
+
+  if(rcMode==='discharge'){
+    v1=U*e;
+    I=-(U/R)*e;
+    detail=`Цэнэг алдалт: τ=${tau.toFixed(2)} с; Uc=${v1.toFixed(3)} В; I=${(I*1000).toFixed(3)} мА`;
+  }else{
+    v1=U*(1-e);
+    I=(U/R)*e;
+    detail=`Цэнэглэлт: τ=${tau.toFixed(2)} с; Uc=${v1.toFixed(3)} В; I=${(I*1000).toFixed(3)} мА`;
+  }
+
+  i1=I;
+  v2=U-v1;
+  question='Конденсаторын хүчдэлийг В-оор бодно уу';
+  answer=v1;
+}
+
 if(l.type===&#x27;fault&#x27;){const f=+vals.fault;req=f===2?10:R1;I=f===1?0:U/req;i1=I;v1=f===1?U: f===2?0:U;detail=f===0?&#x27;Хэвийн ажиллагаа&#x27;:f===1?&#x27;Тасралт: гүйдэл 0 А&#x27;:&#x27;Богино залгаа: 10 Ом гүйдэл хязгаарлагчтай загвар&#x27;;question=&#x27;Нийт гүйдлийг мА-аар бодно уу&#x27;;answer=I*1000}
 return {U,I,req,v1,v2,i1,i2,detail,question,answer};}
 function calc(){
@@ -113,6 +137,26 @@ $(&#x27;controls&#x27;).before(labSwitch);labSwitch.onclick=()=&gt;setSwitch(!sw
 const status=document.createElement(&#x27;p&#x27;);status.id=&#x27;switchNote&#x27;;status.style.cssText=&#x27;font-size:13px;color:#52685e;margin:4px 0 10px&#x27;;status.textContent=&#x27;S1 салгаатай. Залгахад хэлхээ ажиллана.&#x27;;labSwitch.after(status);
 const priorRefresh=refresh;refresh=function(){priorRefresh();status.textContent=switchOn?&#x27;S1 залгаатай — виртуал хэмжилт идэвхтэй.&#x27;:&#x27;S1 салгаатай — хэлхээний гүйдэл 0 А.&#x27;;};
 const priorRender=render;render=function(i){priorRender(i);labSwitch.textContent=&#x27;S1 унтраалга залгах&#x27;;labSwitch.setAttribute(&#x27;aria-pressed&#x27;,&#x27;false&#x27;);status.textContent=&#x27;S1 салгаатай. Залгахад хэлхээ ажиллана.&#x27;;document.dispatchEvent(new Event(&#x27;lab-state-changed&#x27;));};
+if(labs[i].type==='rc'){
+  const modeLabel=document.createElement('label');
+  modeLabel.textContent='RC горим: ';
+
+  const modeSelect=document.createElement('select');
+  modeSelect.innerHTML=`
+    <option value="charge">Цэнэглэх</option>
+    <option value="discharge">Цэнэг алдах</option>
+  `;
+
+  modeSelect.value=rcMode;
+
+  modeSelect.addEventListener('change',function(){
+    rcMode=this.value;
+    refresh();
+  });
+
+  modeLabel.appendChild(modeSelect);
+labSwitch.insertAdjacentElement('afterend', modeLabel);
+}
 // RC хугацааг оюутан гулсагчаар өөрөө тохируулна.
 // Хугацааг автоматаар нэмэхгүй.
 &lt;/script&gt;&lt;script&gt;
