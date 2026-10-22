@@ -148,8 +148,26 @@ function txt(x,y,t){el(&#x27;text&#x27;,{x,y,&#x27;font-size&#x27;:16,&#x27;text
 function resistor(x,y,label,vertical=false){if(vertical){line(x,y-37,x,y-23);el(&#x27;rect&#x27;,{x:x-11,y:y-23,width:22,height:46,fill:&#x27;white&#x27;,stroke:&#x27;#203c32&#x27;,&#x27;stroke-width&#x27;:3});line(x,y+23,x,y+37);txt(x+45,y+5,label);}else{line(x-43,y,x-27,y);el(&#x27;rect&#x27;,{x:x-27,y:y-11,width:54,height:22,fill:&#x27;white&#x27;,stroke:&#x27;#203c32&#x27;,&#x27;stroke-width&#x27;:3});line(x+27,y,x+43,y);txt(x,y-21,label);}}
 function source(){line(80,75,80,128);line(80,172,80,230);line(62,137,98,137);line(70,151,90,151);txt(48,143,&#x27;+&#x27;);txt(48,168,&#x27;−&#x27;);txt(80,270, (vals.U||9)+&#x27; V&#x27;);}
 function switchSymbol(){line(80,75,155,75);el(&#x27;circle&#x27;,{cx:155,cy:75,r:4,fill:&#x27;#203c32&#x27;});el(&#x27;circle&#x27;,{cx:205,cy:75,r:4,fill:&#x27;#203c32&#x27;});line(155,75,window.labSwitchOn?205:196,window.labSwitchOn?75:56);line(205,75,280,75);txt(182,40,&#x27;S1&#x27;);}
-function build(){svg.replaceChildren();el(&#x27;rect&#x27;,{x:1,y:1,width:638,height:298,rx:10,fill:&#x27;#ffffff&#x27;});const typ=labs[idx].type;source();switchSymbol();line(80,230,555,230);line(280,75,555,75);
-if(typ===&#x27;single&#x27;||typ===&#x27;fault&#x27;){line(555,75,555,113);resistor(555,150,&#x27;R1 = &#x27;+(vals.R1||18)+&#x27; Ω&#x27;,true);line(555,187,555,230);if(typ===&#x27;fault&#x27;){el(&#x27;circle&#x27;,{cx:555,cy:207,r:13,fill:&#x27;#ffe2dc&#x27;,stroke:&#x27;#a4430f&#x27;,&#x27;stroke-width&#x27;:2});txt(520,286,&#x27;Гэмтлийн загвар&#x27;);}}
+function build(){svg.replaceChildren();el(&#x27;rect&#x27;,{x:1,y:1,width:638,height:298,rx:10,fill:&#x27;#ffffff&#x27;});const typ=labs[idx].type;source();switchSymbol();line(80,230,555,230);if(!(typ===&#x27;fault&#x27;&amp;&amp;+vals.fault===2))line(280,75,555,75);
+if(typ===&#x27;single&#x27;){line(555,75,555,113);resistor(555,150,&#x27;R1 = &#x27;+(vals.R1||18)+&#x27; Ω&#x27;,true);line(555,187,555,230);}
+else if(typ===&#x27;fault&#x27;){
+ const fault=+vals.fault||0;
+ if(fault===2){
+  // Current-limited short circuit: 10-ohm protective resistor in series,
+  // and a conductor bypassing the 100-ohm load.
+  line(280,75,387,75);resistor(430,75,&#x27;Rхязг = 10 Ω&#x27;);line(473,75,555,75);
+  line(555,75,555,113);resistor(555,150,&#x27;R1 = &#x27;+(vals.R1||100)+&#x27; Ω&#x27;,true);line(555,187,555,230);
+  line(500,75,500,230);el(&#x27;circle&#x27;,{cx:500,cy:75,r:5,fill:&#x27;#b34425&#x27;});el(&#x27;circle&#x27;,{cx:500,cy:230,r:5,fill:&#x27;#b34425&#x27;});
+  txt(440,266,&#x27;Богино залгаа: R1 шунтлагдсан&#x27;);
+ }else{
+  line(555,75,555,113);resistor(555,150,&#x27;R1 = &#x27;+(vals.R1||100)+&#x27; Ω&#x27;,true);
+  if(fault===1){
+   line(555,187,555,196);line(555,218,555,230);
+   el(&#x27;circle&#x27;,{cx:555,cy:196,r:4,fill:&#x27;#a4430f&#x27;});el(&#x27;circle&#x27;,{cx:555,cy:218,r:4,fill:&#x27;#a4430f&#x27;});
+   txt(465,262,&#x27;Тасарсан утас&#x27;);
+  }else{line(555,187,555,230);txt(465,262,&#x27;Хэвийн холболт&#x27;);}
+ }
+}
 else if(typ===&#x27;series&#x27;||typ===&#x27;rc&#x27;){line(555,75,555,99);resistor(555,130,&#x27;R1&#x27;,true);line(555,167,555,180);if(typ===&#x27;rc&#x27;){line(530,183,580,183);line(530,196,580,196);line(555,196,555,230);txt(605,194,&#x27;C&#x27;);}else{resistor(555,194,&#x27;R2&#x27;,true);line(555,231,555,230);}}
 else{line(365,75,365,111);resistor(365,148,&#x27;R1&#x27;,true);line(365,185,365,230);line(555,75,555,111);resistor(555,148,&#x27;R2&#x27;,true);line(555,185,555,230);}
 txt(320,286,labs[idx].title);}
