@@ -126,7 +126,7 @@ function render(i){idx=i;vals={};switchOn=false;elapsed=0;rcMode=&#x27;charge&#x
    select.style.cssText=&#x27;width:100%;padding:9px;border-radius:7px;border:1px solid #a8bdb3&#x27;;
    select.innerHTML=&#x27;&lt;option value=&quot;charge&quot;&gt;Цэнэглэх&lt;/option&gt;&lt;option value=&quot;discharge&quot;&gt;Цэнэг алдах&lt;/option&gt;&#x27;;
    select.value=rcMode;
-   select.onchange=()=&gt;{rcMode=select.value;refresh();$(&#x27;feedback&#x27;).textContent=&#x27;&#x27;;};
+   select.onchange=()=&gt;{rcMode=select.value;refresh();$(&#x27;feedback&#x27;).textContent=&#x27;&#x27;;document.dispatchEvent(new Event(&#x27;lab-state-changed&#x27;));};
    box.append(label,select);$(&#x27;controls&#x27;).append(box);
  }
  $(&#x27;answer&#x27;).value=&#x27;&#x27;;$(&#x27;feedback&#x27;).textContent=&#x27;&#x27;;build3D();refresh()}
@@ -148,7 +148,7 @@ function txt(x,y,t){el(&#x27;text&#x27;,{x,y,&#x27;font-size&#x27;:16,&#x27;text
 function resistor(x,y,label,vertical=false){if(vertical){line(x,y-37,x,y-23);el(&#x27;rect&#x27;,{x:x-11,y:y-23,width:22,height:46,fill:&#x27;white&#x27;,stroke:&#x27;#203c32&#x27;,&#x27;stroke-width&#x27;:3});line(x,y+23,x,y+37);txt(x+45,y+5,label);}else{line(x-43,y,x-27,y);el(&#x27;rect&#x27;,{x:x-27,y:y-11,width:54,height:22,fill:&#x27;white&#x27;,stroke:&#x27;#203c32&#x27;,&#x27;stroke-width&#x27;:3});line(x+27,y,x+43,y);txt(x,y-21,label);}}
 function source(){line(80,75,80,128);line(80,172,80,230);line(62,137,98,137);line(70,151,90,151);txt(48,143,&#x27;+&#x27;);txt(48,168,&#x27;−&#x27;);txt(80,270, (vals.U||9)+&#x27; V&#x27;);}
 function switchSymbol(){line(80,75,155,75);el(&#x27;circle&#x27;,{cx:155,cy:75,r:4,fill:&#x27;#203c32&#x27;});el(&#x27;circle&#x27;,{cx:205,cy:75,r:4,fill:&#x27;#203c32&#x27;});line(155,75,window.labSwitchOn?205:196,window.labSwitchOn?75:56);line(205,75,280,75);txt(182,40,&#x27;S1&#x27;);}
-function build(){svg.replaceChildren();el(&#x27;rect&#x27;,{x:1,y:1,width:638,height:298,rx:10,fill:&#x27;#ffffff&#x27;});const typ=labs[idx].type;source();switchSymbol();line(80,230,555,230);if(!(typ===&#x27;fault&#x27;&amp;&amp;+vals.fault===2))line(280,75,555,75);
+function build(){const selectedRCMode=document.getElementById(&#x27;rcMode&#x27;)?.value||rcMode;svg.replaceChildren();el(&#x27;rect&#x27;,{x:1,y:1,width:638,height:298,rx:10,fill:&#x27;#ffffff&#x27;});const typ=labs[idx].type;source();switchSymbol();line(80,230,555,230);if(!(typ===&#x27;fault&#x27;&amp;&amp;+vals.fault===2))line(280,75,555,75);
 if(typ===&#x27;single&#x27;){line(555,75,555,113);resistor(555,150,&#x27;R1 = &#x27;+(vals.R1||18)+&#x27; Ω&#x27;,true);line(555,187,555,230);}
 else if(typ===&#x27;fault&#x27;){
  const fault=+vals.fault||0;
@@ -168,9 +168,35 @@ else if(typ===&#x27;fault&#x27;){
   }else{line(555,187,555,230);txt(465,262,&#x27;Хэвийн холболт&#x27;);}
  }
 }
-else if(typ===&#x27;series&#x27;||typ===&#x27;rc&#x27;){line(555,75,555,99);resistor(555,130,&#x27;R1&#x27;,true);line(555,167,555,180);if(typ===&#x27;rc&#x27;){line(530,183,580,183);line(530,196,580,196);line(555,196,555,230);txt(605,194,&#x27;C&#x27;);}else{resistor(555,194,&#x27;R2&#x27;,true);line(555,231,555,230);}}
+else if(typ===&#x27;rc&#x27;){
+ if(selectedRCMode===&#x27;charge&#x27;){
+  line(555,75,555,99);resistor(555,130,&#x27;R = &#x27;+vals.R1+&#x27; кΩ&#x27;,true);
+  line(555,167,555,180);line(530,183,580,183);line(530,196,580,196);line(555,196,555,230);
+  txt(603,191,&#x27;C&#x27;);txt(425,38,&#x27;Цэнэглэх →&#x27;);
+  txt(325,262,&#x27;Uc = &#x27;+(vals.U*(1-Math.exp(-vals.t/(vals.R1*1e3*vals.C*1e-6)))).toFixed(2)+&#x27; В&#x27;);
+ }else{
+  // Isolated capacitor and resistor form a closed discharge loop.
+  // The source and its S1 switch are drawn separately, without a conductive link.
+  svg.replaceChildren();el(&#x27;rect&#x27;,{x:1,y:1,width:638,height:298,rx:10,fill:&#x27;#ffffff&#x27;});
+  txt(132,35,&#x27;Тэжээл салгасан&#x27;);
+  line(85,90,85,120);line(85,165,85,225);line(66,130,104,130);line(75,144,95,144);
+  txt(51,140,&#x27;+&#x27;);txt(51,166,&#x27;−&#x27;);txt(87,256,vals.U+&#x27; В&#x27;);
+  line(85,90,130,90);el(&#x27;circle&#x27;,{cx:130,cy:90,r:4,fill:&#x27;#a4430f&#x27;});
+  el(&#x27;circle&#x27;,{cx:180,cy:90,r:4,fill:&#x27;#a4430f&#x27;});line(130,90,169,69);
+  txt(155,56,&#x27;S1 салсан&#x27;);
+  // Independent R-C discharge path
+  line(305,80,382,80);line(468,80,545,80);
+  resistor(425,80,&#x27;R = &#x27;+vals.R1+&#x27; кΩ&#x27;);
+  line(545,80,545,163);line(520,167,570,167);line(520,181,570,181);
+  line(545,181,545,235);line(545,235,305,235);line(305,235,305,80);
+  txt(594,180,&#x27;C&#x27;);txt(418,261,&#x27;I ←&#x27;);
+  txt(416,44,&#x27;Цэнэг алдах&#x27;);
+  txt(417,287,&#x27;Uc = &#x27;+(vals.U*Math.exp(-vals.t/(vals.R1*1e3*vals.C*1e-6))).toFixed(2)+&#x27; В&#x27;);
+ }
+}
+else if(typ===&#x27;series&#x27;){line(555,75,555,99);resistor(555,130,&#x27;R1&#x27;,true);line(555,167,555,180);resistor(555,194,&#x27;R2&#x27;,true);line(555,231,555,230);}
 else{line(365,75,365,111);resistor(365,148,&#x27;R1&#x27;,true);line(365,185,365,230);line(555,75,555,111);resistor(555,148,&#x27;R2&#x27;,true);line(555,185,555,230);}
-txt(320,286,labs[idx].title);}
+if(!(typ===&#x27;rc&#x27;&amp;&amp;selectedRCMode===&#x27;discharge&#x27;))txt(320,286,labs[idx].title);}
 function stopCamera(){if(cameraStream){cameraStream.getTracks().forEach(t=&gt;t.stop());cameraStream=null;}if(video){video.remove();video=null;}}
 function setMode(m){if(m!==&#x27;camera&#x27;)stopCamera();$id(&#x27;schematicPanel&#x27;).hidden=m!==&#x27;schematic&#x27;;stage.hidden=m===&#x27;schematic&#x27;;for(const [id,v] of [[&#x27;showSchematic&#x27;,&#x27;schematic&#x27;],[&#x27;show3d&#x27;,&#x27;3d&#x27;],[&#x27;showCamera&#x27;,&#x27;camera&#x27;]])$id(id).setAttribute(&#x27;aria-pressed&#x27;,String(m===v));$id(&#x27;cameraStatus&#x27;).textContent=m===&#x27;schematic&#x27;?&#x27;Стандарт тэмдэглэгээтэй 2D зарчмын схем.&#x27;:m===&#x27;3d&#x27;?&#x27;3D загварыг чирж эргүүлнэ.&#x27;:&#x27;Камерын зөвшөөрөл шаардлагатай.&#x27;;if(m!==&#x27;schematic&#x27;)setTimeout(()=&gt;window.dispatchEvent(new Event(&#x27;resize&#x27;)),50);}
 $id(&#x27;showSchematic&#x27;).onclick=()=&gt;setMode(&#x27;schematic&#x27;);$id(&#x27;show3d&#x27;).onclick=()=&gt;setMode(&#x27;3d&#x27;);
@@ -179,7 +205,7 @@ const oldRender=render;render=function(i){stopCamera();oldRender(i);build();setM
 // Original event handlers reference render dynamically; initialize the first diagram here.
 build();setMode(&#x27;schematic&#x27;);
 // Parameter changes update the schematic as well as meter readings.
-const controls=$id(&#x27;controls&#x27;);controls.addEventListener(&#x27;input&#x27;,()=&gt;build());document.addEventListener(&#x27;lab-state-changed&#x27;,build);
+const controls=$id(&#x27;controls&#x27;);controls.addEventListener(&#x27;input&#x27;,()=&gt;build());controls.addEventListener(&#x27;change&#x27;,function(event){if(event.target.id===&#x27;rcMode&#x27;)build();});document.addEventListener(&#x27;lab-state-changed&#x27;,build);
 window.addEventListener(&#x27;pagehide&#x27;,stopCamera);
 })();
 &lt;/script&gt;&lt;/body&gt;&lt;/html&gt;" title="Цахилгаан хэлхээний зургаан лаборатори"></iframe></section>
