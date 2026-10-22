@@ -79,35 +79,11 @@ const labs=[
 {title:&#x27;4. Кирхгофын хуулиуд&#x27;,theory:&#x27;Зангилаанд орох гүйдлийн нийлбэр гарах гүйдэлтэй тэнцүү; хаалттай хүрээний хүчдэлийн алгебр нийлбэр тэг.&#x27;,params:[[&#x27;U&#x27;,&#x27;Хүчдэл, В&#x27;,15,1,24,1],[&#x27;R1&#x27;,&#x27;Салаа 1, Ом&#x27;,150,10,500,10],[&#x27;R2&#x27;,&#x27;Салаа 2, Ом&#x27;,300,10,500,10]],type:&#x27;kirchhoff&#x27;},
 {title:&#x27;5. RC шилжилтийн процесс&#x27;,theory:&#x27;Цэнэглэлт: Uc(t) = U(1 − exp(−t/RC)), I(t) = U/R · exp(−t/RC).&#x27;,params:[[&#x27;U&#x27;,&#x27;Хүчдэл, В&#x27;,12,1,24,1],[&#x27;R1&#x27;,&#x27;R, кОм&#x27;,10,1,100,1],[&#x27;C&#x27;,&#x27;C, мкФ&#x27;,100,10,1000,10],[&#x27;t&#x27;,&#x27;Хугацаа, секунд&#x27;,1,0,20,.1]],type:&#x27;rc&#x27;},
 {title:&#x27;6. Гэмтэл илрүүлэх&#x27;,theory:&#x27;Хэлхээ тасрах болон богино залгааны нөхцөлийг харьцуулна. Богино залгаанд хамгаалалтын гүйдэл хязгаарлагчийг загварчилсан.&#x27;,params:[[&#x27;U&#x27;,&#x27;Хүчдэл, В&#x27;,9,1,24,1],[&#x27;R1&#x27;,&#x27;Ачаалал, Ом&#x27;,100,10,500,10],[&#x27;fault&#x27;,&#x27;Төлөв: 0 хэвийн, 1 тасарсан, 2 богино&#x27;,0,0,2,1]],type:&#x27;fault&#x27;}];
-let idx=0,vals={},lastMeasure=&#x27;&#x27;,switchOn=false,elapsed=0;window.labSwitchOn=false; let rcMode='charge'; function baseCalc(){const l=labs[idx],U=+vals.U,R1=+vals.R1,R2=+vals.R2||0;let I=0,req=R1,v1=U,v2=0,i1=0,i2=0,detail=&#x27;&#x27;,question=&#x27;&#x27;,answer=0;
+let idx=0,vals={},lastMeasure=&#x27;&#x27;,switchOn=false,elapsed=0;window.labSwitchOn=false;function baseCalc(){const l=labs[idx],U=+vals.U,R1=+vals.R1,R2=+vals.R2||0;let I=0,req=R1,v1=U,v2=0,i1=0,i2=0,detail=&#x27;&#x27;,question=&#x27;&#x27;,answer=0;
 if(l.type===&#x27;single&#x27;){I=U/R1;i1=I;detail=`I = ${(I*1000).toFixed(2)} мА, P = ${(U*I).toFixed(3)} Вт`;question=&#x27;Гүйдлийг мА-аар бодно уу&#x27;;answer=I*1000}
 if(l.type===&#x27;series&#x27;){req=R1+R2;I=U/req;i1=I;i2=I;v1=I*R1;v2=I*R2;detail=`U1=${v1.toFixed(2)} В, U2=${v2.toFixed(2)} В; U1+U2=${U.toFixed(2)} В`;question=&#x27;R2 дээрх хүчдэлийг В-оор бодно уу&#x27;;answer=v2}
 if(l.type===&#x27;parallel&#x27;||l.type===&#x27;kirchhoff&#x27;){req=R1*R2/(R1+R2);i1=U/R1;i2=U/R2;I=i1+i2;v1=U;v2=U;detail=`I1=${(i1*1000).toFixed(2)} мА, I2=${(i2*1000).toFixed(2)} мА, Iнийт=${(I*1000).toFixed(2)} мА`;question=&#x27;Нийт гүйдлийг мА-аар бодно уу&#x27;;answer=I*1000}
-
-if(l.type==='rc'){
-  const R=R1*1000;
-  const C=+vals.C*1e-6;
-  const t=+vals.t;
-  const tau=R*C;
-  const e=Math.exp(-t/tau);
-  req=R;
-
-  if(rcMode==='discharge'){
-    v1=U*e;
-    I=-(U/R)*e;
-    detail=`Цэнэг алдалт: τ=${tau.toFixed(2)} с; Uc=${v1.toFixed(3)} В; I=${(I*1000).toFixed(3)} мА`;
-  }else{
-    v1=U*(1-e);
-    I=(U/R)*e;
-    detail=`Цэнэглэлт: τ=${tau.toFixed(2)} с; Uc=${v1.toFixed(3)} В; I=${(I*1000).toFixed(3)} мА`;
-  }
-
-  i1=I;
-  v2=U-v1;
-  question='Конденсаторын хүчдэлийг В-оор бодно уу';
-  answer=v1;
-}
-
+if(l.type===&#x27;rc&#x27;){const R=R1*1000,C=+vals.C*1e-6,t=+vals.t;req=R;I=U/R*Math.exp(-t/(R*C));i1=I;v1=U*(1-Math.exp(-t/(R*C)));v2=U-v1;detail=`τ=RC=${(R*C).toFixed(2)} с; Uc=${v1.toFixed(3)} В; I=${(I*1000).toFixed(3)} мА`;question=&#x27;Конденсаторын хүчдэлийг В-оор бодно уу&#x27;;answer=v1}
 if(l.type===&#x27;fault&#x27;){const f=+vals.fault;req=f===2?10:R1;I=f===1?0:U/req;i1=I;v1=f===1?U: f===2?0:U;detail=f===0?&#x27;Хэвийн ажиллагаа&#x27;:f===1?&#x27;Тасралт: гүйдэл 0 А&#x27;:&#x27;Богино залгаа: 10 Ом гүйдэл хязгаарлагчтай загвар&#x27;;question=&#x27;Нийт гүйдлийг мА-аар бодно уу&#x27;;answer=I*1000}
 return {U,I,req,v1,v2,i1,i2,detail,question,answer};}
 function calc(){
@@ -137,16 +113,7 @@ $(&#x27;controls&#x27;).before(labSwitch);labSwitch.onclick=()=&gt;setSwitch(!sw
 const status=document.createElement(&#x27;p&#x27;);status.id=&#x27;switchNote&#x27;;status.style.cssText=&#x27;font-size:13px;color:#52685e;margin:4px 0 10px&#x27;;status.textContent=&#x27;S1 салгаатай. Залгахад хэлхээ ажиллана.&#x27;;labSwitch.after(status);
 const priorRefresh=refresh;refresh=function(){priorRefresh();status.textContent=switchOn?&#x27;S1 залгаатай — виртуал хэмжилт идэвхтэй.&#x27;:&#x27;S1 салгаатай — хэлхээний гүйдэл 0 А.&#x27;;};
 const priorRender=render;render=function(i){priorRender(i);labSwitch.textContent=&#x27;S1 унтраалга залгах&#x27;;labSwitch.setAttribute(&#x27;aria-pressed&#x27;,&#x27;false&#x27;);status.textContent=&#x27;S1 салгаатай. Залгахад хэлхээ ажиллана.&#x27;;document.dispatchEvent(new Event(&#x27;lab-state-changed&#x27;));};
-  modeSelect.addEventListener('change',function(){
-    rcMode=this.value;
-    refresh();
-  });
-
-  modeLabel.appendChild(modeSelect);
-labSwitch.insertAdjacentElement('afterend', modeLabel);
-}
-// RC хугацааг оюутан гулсагчаар өөрөө тохируулна.
-// Хугацааг автоматаар нэмэхгүй.
+let previous=performance.now();setInterval(()=&gt;{let now=performance.now(),dt=Math.min((now-previous)/1000,.25);previous=now;if(!switchOn||labs[idx].type!==&#x27;rc&#x27;)return;elapsed=Math.min(20,elapsed+dt);vals.t=elapsed;let inp=document.querySelector(&#x27;[data-param=&quot;t&quot;]&#x27;);if(inp){inp.value=String(elapsed);inp.parentElement.querySelector(&#x27;output&#x27;).textContent=elapsed.toFixed(1);}refresh();},100);
 &lt;/script&gt;&lt;script&gt;
 (function(){
 const $id=id=&gt;document.getElementById(id), svg=$id(&#x27;circuit2d&#x27;), stage=$id(&#x27;scene&#x27;);
