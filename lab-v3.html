@@ -1,4 +1,3 @@
-```
 <!DOCTYPE html>
 
 <html lang="mn">
@@ -49,7 +48,7 @@ button:focus-visible{outline:3px solid var(--acc);outline-offset:2px}
 <main>
 <h1>AR цахилгаан хэлхээ</h1>
 <p class="sub">Хэлхээг эргүүлж, унтраалгыг дарж, чийдэн хэрхэн асахыг өөрөө шалга.</p>
-<nav aria-label="Сургалтын хэсэг сонгох" class="viewnav"><button aria-pressed="true" id="view3d" type="button">3D / AR хэлхээ</button><button aria-pressed="false" id="viewlabs" type="button">6 виртуал лаборатори · 3D хэмжилт</button><button aria-pressed="false" id="viewpanel" type="button">7-р модуль · Самбар ба гэрлийн хэлхээ</button></nav>
+<nav aria-label="Сургалтын хэсэг сонгох" class="viewnav"><button aria-pressed="true" id="view3d" type="button">3D / AR хэлхээ</button><button aria-pressed="false" id="viewlabs" type="button">6 виртуал лаборатори · 3D хэмжилт</button><button aria-pressed="false" id="viewpanel" type="button">Модуль 6 · Самбар ба гэрлийн хэлхээ</button></nav>
 <section id="arview"><div class="stage" id="stage">
 <video id="vid" muted="" playsinline=""></video>
 <canvas aria-label="3D цахилгаан хэлхээ" id="cv"></canvas>
@@ -249,7 +248,7 @@ window.addEventListener('pagehide',stopCamera);
 })();
 &lt;/script&gt;
 &lt;/body&gt;&lt;/html&gt;" title="Цахилгаан хэлхээний зургаан лаборатори"></iframe></section>
-<section aria-label="7-р модуль: Самбар ба гэрлийн хэлхээ" hidden id="panelview"><iframe id="panelframe" title="Самбар, автомат, УЗО, гэрэлтүүлэг, розетка ба IEC стандарт" loading="eager" sandbox="allow-scripts" srcdoc="&lt;!DOCTYPE html&gt;
+<section aria-label="Модуль 6: Самбар ба гэрлийн хэлхээ" hidden id="panelview"><iframe id="panelframe" title="Самбар, автомат, УЗО, гэрэлтүүлэг, розетка ба IEC стандарт" loading="eager" sandbox="allow-scripts allow-same-origin" srcdoc="&lt;!DOCTYPE html&gt;
 &lt;html lang=&quot;mn&quot;&gt;
 &lt;head&gt;
 &lt;meta charset=&quot;utf-8&quot;&gt;
@@ -794,7 +793,31 @@ function loop(now){var dt=Math.min((now-last)/1000,.05);last=now;
 size();build();requestAnimationFrame(loop);
 })();
 </script>
+
+<script>
+/* ETUGEN module navigation: original simulation code is preserved. */
+(function(){
+ const p=new URLSearchParams(location.search), view=p.get('view'), lab=p.get('lab'), panel=p.get('panel');
+ if(!view)return;
+ const target=view==='labs'?'viewlabs':view==='panel'?'viewpanel':'view3d';
+ function go(){document.getElementById(target)?.click();}
+ function activate(frameId,selector){
+   const frame=document.getElementById(frameId);if(!frame)return;
+   const run=()=>{try{frame.contentDocument?.querySelector(selector)?.click();}catch(e){console.warn('Cannot select laboratory',e);}};
+   frame.addEventListener('load',run);if(frame.contentDocument?.readyState==='complete')run();
+ }
+ if(view==='labs' && lab!==null && /^[0-5]$/.test(lab)) activate('labframe','#nav button:nth-child('+(Number(lab)+1)+')');
+ if(view==='panel' && panel && /^[abcd]$/.test(panel)) activate('panelframe','[data-m="'+panel+'"]');
+ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',go);else go();
+ const main=document.querySelector('main');if(main){
+  const bar=document.createElement('div');bar.style.cssText='display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px';
+  bar.innerHTML='<a href="index.html" style="display:inline-block;padding:10px 14px;border-radius:9px;background:#0f7a5f;color:white;text-decoration:none">← Нүүр хуудас</a>'+(view==='labs'?'':'<a href="module-6.html" style="display:inline-block;padding:10px 14px;border-radius:9px;border:1px solid #9eb5aa;color:inherit;text-decoration:none">← Модуль 6</a>');
+  main.prepend(bar);
+  document.querySelector('.viewnav')?.setAttribute('hidden','');
+  const style=document.createElement('style');style.textContent='.viewnav[hidden]{display:none!important}';document.head.append(style);
+ }
+})();
+</script>
 </body>
 </html>
 <!-- Trigger GitHub Pages redeployment -->
-```
